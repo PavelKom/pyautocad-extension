@@ -13,4 +13,7 @@
 __docformat__ = 'restructuredtext en'
 __version__ = '0.0.1'
 
-from pyautocad-extension.enum import *
+from .application import *
+from .document import *
+from enum import *
+from .geometry import *
