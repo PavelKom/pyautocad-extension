@@ -1,11 +1,15 @@
-from .application import acad_app
+
 
 
 class AcadDocument(object):
     def __init__(self, template="", create_new=True):
         self.me = None
         if create_new:
+            from .application import acad_app
             self.me = acad_app.create_doc(template)
+
+    def __eq__(self, other):
+        return self.me == other.me
 
     @staticmethod
     def from_app(doc):
