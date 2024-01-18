@@ -1,6 +1,5 @@
 
 
-
 class AcadDocument(object):
     def __init__(self, template="", create_new=True):
         self._me = None
@@ -9,28 +8,27 @@ class AcadDocument(object):
             self._me = acad_app.create_doc(template)
 
     def __eq__(self, other):
-        return self._me == other._me
-	
-
+        return other.same(self._me)
+    
     @staticmethod
     def from_app(doc):
         _doc = AcadDocument(create_new=False)
         _doc._me = doc
         return _doc
-	
-	def unbind(self):
-		self._me = None
-		del self
-	
-	def same(self, other):
-		return self._me == other
-		
-	def is_valid(self):
-		try:
-			self._me.Name
-			return True
-		except:
-			False
+    
+    def unbind(self):
+        self._me = None
+        del self
+    
+    def same(self, other):
+        return self._me == other
+        
+    def is_valid(self):
+        try:
+            self._me.Name
+            return True
+        except:
+            False
 
     def activate(self):
         """
@@ -140,14 +138,14 @@ class AcadDocument(object):
         self._me.ActiveTextStyle = value
 
     @property
-    def active_UCS(self):  # As AcadUCS
+    def active_ucs(self):  # As AcadUCS
         """
         Specifies the active UCS for the drawing
         """
         return self._me.ActiveUCS
 
-    @active_UCS.setter
-    def active_UCS(self, value):
+    @active_ucs.setter
+    def active_ucs(self, value):
         self._me.ActiveUCS = value
 
     @property
@@ -182,108 +180,108 @@ class AcadDocument(object):
         """
         return self._me.Blocks
 
-	def close(self, save=False, file=None):
-		"""
-		Closes the specified drawing, or all open drawings
-		"""
-		if save == False:
-			self._me.Close()
-		elif file is None:
-			self._me.Close(save)
-		else:
-			self._me.Close(save, file)
-		del self
+    def close(self, save=False, file=None):
+        """
+        Closes the specified drawing, or all open drawings
+        """
+        if not save:
+            self._me.Close()
+        elif file is None:
+            self._me.Close(save)
+        else:
+            self._me.Close(save, file)
+        del self
 
-	def copy_objects(self, object, owner=None, id_pairs=None):
-		"""
-		Duplicates multiple objects (deep cloning)
-		"""
-		if owner is None and id_pairs is None:
-			self._me.CopyObjects(object)
-		elif id_pairs is None:
-			self._me.CopyObjects(object, owner)
-		else:
-			self._me.CopyObjects(object, owner, id_pairs)
-	
-	@property
-	def database(self):  # As AcadDatabase
-		"""
-		Gets the database in which the object belongs
-		"""
-		return self._me.Database
-		
-	@property
-	def dictionaries(self):  # As AcadDictionaries
-		"""
-		Gets the Dictionaries collection for the document
-		"""
-		return self._me.Dictionaries
+    def copy_objects(self, obj, owner=None, id_pairs=None):
+        """
+        Duplicates multiple objects (deep cloning)
+        """
+        if owner is None and id_pairs is None:
+            self._me.CopyObjects(obj)
+        elif id_pairs is None:
+            self._me.CopyObjects(obj, owner)
+        else:
+            self._me.CopyObjects(obj, owner, id_pairs)
+    
+    @property
+    def database(self):  # As AcadDatabase
+        """
+        Gets the database in which the object belongs
+        """
+        return self._me.Database
+        
+    @property
+    def dictionaries(self):  # As AcadDictionaries
+        """
+        Gets the Dictionaries collection for the document
+        """
+        return self._me.Dictionaries
 
-	@property
-	def dimstyles(self):  # As AcadDimStyles
-		"""
-		Gets the DimStyles collection for the document
-		"""
-		return self._me.DimStyles
-	
-	@property
-	def elevationmodelspace(self) -> float:
-		"""
-		Specifies the elevation setting in the model space
-		"""
-		return self._me.ElevationModelSpace
-		
-	@elevationmodelspace.setter
-	def elevationmodelspace(self, value: float):
-		self._me.ElevationModelSpace = value
-	
-	@property
-	def elevationpaperspace(self) -> float:
-		"""
-		Specifies the elevation setting in the paper space
-		"""
-		return self._me.ElevationPaperSpace
-		
-	@elevationpaperspace.setter
-	def elevationpaperspace(self, value: float):
-		self._me.ElevationPaperSpace = value
-	
-	def endundomark(self):
-		self._me.EndUndoMark()
-	
-	def export(self, file, ext, select):  #select As AcadSelectionSet
-		"""
-		Exports the AutoCAD drawing to a WMF, SAT, EPS, DXF, or BMP format
-		"""
-		self._me.Export(file, ext, select)
-	
-	@property
-	def fullname(self) -> str:
-		"""
-		Gets the name of the application or document, including the path
-		"""
-		return self._me.FullName
+    @property
+    def dimstyles(self):  # As AcadDimStyles
+        """
+        Gets the DimStyles collection for the document
+        """
+        return self._me.DimStyles
+    
+    @property
+    def elevationmodelspace(self) -> float:
+        """
+        Specifies the elevation setting in the model space
+        """
+        return self._me.ElevationModelSpace
+        
+    @elevationmodelspace.setter
+    def elevationmodelspace(self, value: float):
+        self._me.ElevationModelSpace = value
+    
+    @property
+    def elevationpaperspace(self) -> float:
+        """
+        Specifies the elevation setting in the paper space
+        """
+        return self._me.ElevationPaperSpace
+        
+    @elevationpaperspace.setter
+    def elevationpaperspace(self, value: float):
+        self._me.ElevationPaperSpace = value
+    
+    def endundomark(self):
+        self._me.EndUndoMark()
+    
+    def export(self, file, ext, select):  # select As AcadSelectionSet
+        """
+        Exports the AutoCAD drawing to a WMF, SAT, EPS, DXF, or BMP format
+        """
+        self._me.Export(file, ext, select)
+    
+    @property
+    def fullname(self) -> str:
+        """
+        Gets the name of the application or document, including the path
+        """
+        return self._me.FullName
 
-	def getvariable(self, name: str):
-		"""
-		Gets the current setting of an AutoCAD system variable
-		"""
-		return self._me.GetVariable(name)
+    def getvariable(self, name: str):
+        """
+        Gets the current setting of an AutoCAD system variable
+        """
+        return self._me.GetVariable(name)
 
-	@property
-	def groups(self):
-		"""
-		Gets the Groups collection for the document
-		"""
-		return self._me.Groups
+    @property
+    def groups(self):
+        """
+        Gets the Groups collection for the document
+        """
+        return self._me.Groups
 
-	def handle_to_object(self, handle: str):
-		"""
-		Gets the object that corresponds to the given handle
-		"""
-		return self._me.HandleToObject(handle)
+    def handle_to_object(self, handle: str):
+        """
+        Gets the object that corresponds to the given handle
+        """
+        return self._me.HandleToObject(handle)
 
-	@property
+    @property
     def height(self) -> int:
         """
         Height of the attribute, shape, text, or view toolbar or the main application window
@@ -293,35 +291,35 @@ class AcadDocument(object):
     @height.setter
     def height(self, value):
         self._me.Height = value
-	
-	@property
+    
+    @property
     def hwnd(self):  # As LongPtr
         """
         Gets the window handle of the application window frame
         """
         return self._me.HWND
-	
-	def import(self, file: str, point, scale: float):
-		"""
-		Imports a drawing file in SAT, EPS, DXF, or WMF format
-		"""
-		return self._me.Import(file, point, scale)
+    
+    def imports(self, file: str, point, scale: float):
+        """
+        Imports a drawing file in SAT, EPS, DXF, or WMF format
+        """
+        return self._me.Import(file, point, scale)
 
-	@property
+    @property
     def layers(self):  # As AcadLayers
         """
         Gets the Layers collection for the document
         """
         return self._me.Layers
-		
-	@property
+        
+    @property
     def layouts(self):  # As AcadLayouts
         """
         Gets the Layouts collection for the document
         """
         return self._me.Layouts
 
-	@property
+    @property
     def limits(self):  # As Variant
         """
         Specifies the drawing limits
@@ -332,33 +330,33 @@ class AcadDocument(object):
     def limits(self, value):
         self._me.Limits = value
 
-	@property
+    @property
     def linetypes(self):  # As AcadLineTypes
         """
         Gets the Linetypes collection for the document
         """
         return self._me.Linetypes 
 
-	def LoadShapeFile(self, file: str):
-		"""
-		Loads a shape file (SHX)
-		"""
-		self._me.LoadShapeFile(file)
+    def load_shape_file(self, file: str):
+        """
+        Loads a shape file (SHX)
+        """
+        self._me.load_shape_file(file)
 
-	@staticmethod
-	def new(template: str) -> AcadDocument:
-		"""
-		Creates a new document in SDI mode
-		"""
-		return AcadDocument(template)
-	
-	def ObjectIdToObject(self, object_id):
-		"""
-		Gets the object that corresponds to the given object ID
-		"""
-		return self._me.ObjectIdToObject(object_id)
-	
-	@property
+    @staticmethod
+    def new(template: str):
+        """
+        Creates a new document in SDI mode
+        """
+        return AcadDocument(template)
+    
+    def obj_id_to_object(self, object_id):
+        """
+        Gets the object that corresponds to the given object ID
+        """
+        return self._me.ObjectIdToObject(object_id)
+    
+    @property
     def object_snap_mode(self) -> bool:
         """
         Specifies the setting of the object snap mode
@@ -368,13 +366,16 @@ class AcadDocument(object):
     @object_snap_mode.setter
     def object_snap_mode(self, value: bool):
         self._me.ObjectSnapMode = value
-	
-	@staticmethod
-	def open(file: str, read_only=False, password=None):
-		from .application import acad_docs
-		return acad_docs.open(file,read_only,password)
-	
-	
+    
+    @staticmethod
+    def open(file: str, read_only=False, password=None):
+        from .application import acad_docs
+        return acad_docs.open(file, read_only, password)
+    
+
+
+
+
 
     """
     events:
@@ -392,21 +393,21 @@ class AcadDocument(object):
         BeginShortcutMenuEdit
         BeginShortcutMenuGrip
         BeginShortcutMenuOsnap
-		Deactivate
-		EndCommand
-		EndLisp
-		EndPlot
-		EndSave
-		EndShortcutMenu
-		LayoutSwitched
-		LispCancelled
-		ObjectAdded
-		ObjectErased
-		ObjectModified
-		
-		
-		
-		
+        Deactivate
+        EndCommand
+        EndLisp
+        EndPlot
+        EndSave
+        EndShortcutMenu
+        LayoutSwitched
+        LispCancelled
+        ObjectAdded
+        ObjectErased
+        ObjectModified
+        
+        
+        
+        
     """
 
 

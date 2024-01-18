@@ -4,9 +4,10 @@ from pyautocad import Autocad
 # Autoopen application, because it's REALLY necessary
 acad = Autocad(True)
 
+
 class AcadApplication(object):
     def __init__(self):
-        self.me = acad.app
+        self._me = acad.app
 
     @property
     def app(self):
@@ -15,7 +16,7 @@ class AcadApplication(object):
         Kinda sus
         """
         #return self._me.Application
-        return self.me
+        return self._me
 
     @property
     def cap(self) -> str:
@@ -24,27 +25,26 @@ class AcadApplication(object):
         """
         return self._me.Caption
 
-    from .document import AcadDocument
+    
     @property
     def doc(self):
         """
         Specifies the active document (drawing file)
         """
+        from .document import AcadDocument
         return AcadDocument.from_app(self._me.ActiveDocument)
 
+    from .document import AcadDocument
     @doc.setter
     def doc(self, value: AcadDocument):
-        self._me.ActiveDocument = value.me
+        self._me.ActiveDocument = value._me
 
     @property
     def docs(self):
         """
-        Return tuple of all opened documents
+        Return global AcadDocuments object
         """
-        docs = []
-        for doc in self._me.Documents:
-            docs.append(AcadDocument.from_app(doc))
-        return tuple(docs)
+        return acad_docs
 
     @property
     def docs_coll(self):
@@ -321,7 +321,7 @@ class AcadApplication(object):
 
     def close_doc(self, name=""):
         if len(name) > 0:
-            doc = get_doc_by_name(name)
+            doc = acad_docs.get_by_name(name)
         else:
             doc = self.doc
         if doc is not None:
@@ -359,80 +359,82 @@ class AcadApplication(object):
 acad_app = AcadApplication()
 
 class AcadDocuments:
-	from .documents import AcadDocument
-	def __init__(self):
-		self._me = acad_app.docs
-		self._docs = []
-		for doc in self._me:
-			self._docs.append(AcadDocument.from_app(doc))
-	
-	def add(self, template: str):
-		"""
-		Creates a member object and adds it to the appropriate collection
-		"""
-		self._docs.append(
-			AcadDocument.from_app(
-				self._add(template)))
-		return self._docs[-1]
-	
-	def _add(self, template):
-		return self._me.Add(template)
-	
-	def close(self):
-		"""
-		Close ALL opened documents
-		"""
-		for doc in self._docs:
-			doc.unbind()
-		self._me.Close()
-	
-	def item(self, index:int):
-		self._update()
-		if index < len(self) and index >= 0:
-			return self._docs[index]
-		return None
-	
-	def get(self, index:int):
-		return self.item(index)
-	
-	def get_by_name(self, name: str):
-		self._update()
-		for doc in self:
-			if doc.name == name:
-				return doc
-			
-		
-	def open(self, path:str, read_only=False, password=None):
-		if password is None:
-			doc = self._me.Open(path,read_only)
-		else:
-			doc = self._me.Open(path,read_only,password)
-		self._docs.append(AcadDocument.from_app(doc))
-	
-	def _update(self):
-		# Update document list
-		for doc in self._me:
-			if self._already_exist(doc) == -1:
-				self._docs.append(AcadDocument.from_app(doc))
-		# Remove invalid AcadDocument objects
-		for i in range(len(self._docs)-1,-1,-1):
-			if not self._docs[i].is_valid()
-				self._docs[i].unbind()
-				self._doc.pop(i)
-	
-	def __iter__(self):
-		self._update()
-		for doc in self._docs:
-			yield doc
-	
-	def _already_exist(self, doc):
-		for i, adoc in enumarate(self._docs):
-			if adoc.same(doc):
-				return i
-		return 0
-		
-	def __len__(self):
-		return self._me.Count
+    def __init__(self):
+        self._me = acad_app.docs
+        self._docs = []
+        for doc in self._me:
+            from .document import AcadDocument
+            self._docs.append(AcadDocument.from_app(doc))
+    
+    def add(self, template: str):
+        """
+        Creates a member object and adds it to the appropriate collection
+        """
+        from .document import AcadDocument
+        self._docs.append(
+            AcadDocument.from_app(
+                self._add(template)))
+        return self._docs[-1]
+    
+    def _add(self, template):
+        return self._me.Add(template)
+    
+    def close(self):
+        """
+        Close ALL opened documents
+        """
+        for doc in self._docs:
+            doc.unbind()
+        self._me.Close()
+    
+    def item(self, index:int):
+        self._update()
+        if index < len(self) and index >= 0:
+            return self._docs[index]
+        return None
+    
+    def get(self, index:int):
+        return self.item(index)
+    
+    def get_by_name(self, name: str):
+        self._update()
+        for doc in self:
+            if doc.name == name:
+                return doc
+
+    def open(self, path:str, read_only=False, password=None):
+        if password is None:
+            doc = self._me.Open(path,read_only)
+        else:
+            doc = self._me.Open(path,read_only,password)
+        from .document import AcadDocument
+        self._docs.append(AcadDocument.from_app(doc))
+    
+    def _update(self):
+        # Update document list
+        from .document import AcadDocument
+        for doc in self._me:
+            if self._already_exist(doc) == -1:
+                self._docs.append(AcadDocument.from_app(doc))
+        # Remove invalid AcadDocument objects
+        for i in range(len(self._docs)-1,-1,-1):
+            if not self._docs[i].is_valid():
+                self._docs[i].unbind()
+                self._doc.pop(i)
+    
+    def __iter__(self):
+        self._update()
+        for doc in self._docs:
+            yield doc
+    
+    def _already_exist(self, doc):
+        for i, adoc in enumerate(self._docs):
+            if adoc.same(doc):
+                return i
+        return 0
+        
+    def __len__(self):
+        return self._me.Count
 
 # Global AutoCAD AcadDocuments object
 acad_docs = AcadDocuments()
