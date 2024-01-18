@@ -1,7 +1,5 @@
 from pyautocad import Autocad
 
-from .document import AcadDocument
-
 # Global Autocad Automation object
 # Autoopen application, because it's REALLY necessary
 acad = Autocad(True)
@@ -9,17 +7,6 @@ acad = Autocad(True)
 class AcadApplication(object):
     def __init__(self):
         self.me = acad.app
-
-    @property
-    def doc(self):
-        """
-        Specifies the active document (drawing file)
-        """
-        return AcadDocument.from_app(self.me.ActiveDocument)
-
-    @doc.setter
-    def doc(self, value: AcadDocument):
-        self.me.ActiveDocument = value.me
 
     @property
     def app(self):
@@ -36,6 +23,18 @@ class AcadApplication(object):
         Gets the text that the user sees displayed for the application or a menu item
         """
         return self.me.Caption
+
+    from .document import AcadDocument
+    @property
+    def doc(self):
+        """
+        Specifies the active document (drawing file)
+        """
+        return AcadDocument.from_app(self.me.ActiveDocument)
+
+    @doc.setter
+    def doc(self, value: AcadDocument):
+        self.me.ActiveDocument = value.me
 
     @property
     def docs(self):
