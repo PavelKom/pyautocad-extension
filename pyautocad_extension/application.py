@@ -1,5 +1,7 @@
 from pyautocad import Autocad
 
+from .document import AcadDocument
+
 # Global Autocad Automation object
 # Autoopen application, because it's REALLY necessary
 acad = Autocad(True)
@@ -8,21 +10,15 @@ class AcadApplication(object):
     def __init__(self):
         self.me = acad.app
 
-    def __eq__(self, other):
-        return self.me == other.me
-
-    from .document import AcadDocument
     @property
     def doc(self):
         """
         Specifies the active document (drawing file)
         """
-        #from .document import AcadDocument
         return AcadDocument.from_app(self.me.ActiveDocument)
 
     @doc.setter
     def doc(self, value: AcadDocument):
-        #from .document import AcadDocument
         self.me.ActiveDocument = value.me
 
     @property
@@ -374,3 +370,4 @@ def get_doc_by_name(name):
         if doc.name == name:
             return doc
     return None
+
