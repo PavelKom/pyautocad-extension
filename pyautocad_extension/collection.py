@@ -1,8 +1,12 @@
 
 
 class Collection(object):
-    def __init__(self, obj):
-        self.me = obj
+    def __init__(self, obj=None):
+        if obj is not None:
+            self.me = obj
+        else:
+            # ToDo: CreateObject("")
+            pass
 
     def Add(self, item, key=None, before=None, after=None):
         kw = dict()

@@ -15,5 +15,5 @@ __version__ = '0.0.1'
 
 from .application import *
 from .document import *
-from enum import *
+from .enum import *
 from .geometry import *
