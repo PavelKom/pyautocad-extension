@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """
-    pyautocad-extension 
+    pyautocad_extension 
     ~~~~~~~~~
 
     Additional functions, variables, constant and classes for pyautocad module (https://pypi.org/project/pyautocad/ or https://github.com/reclosedev/pyautocad)
@@ -17,3 +18,4 @@ from .application import *
 from .document import *
 from .enum import *
 from .geometry import *
+

@@ -1,4 +1,5 @@
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 class AcadDocument(object):
     def __init__(self, template="", create_new=True):
@@ -9,20 +10,20 @@ class AcadDocument(object):
 
     def __eq__(self, other):
         return other.same(self._me)
-    
+
     @staticmethod
     def from_app(doc):
         _doc = AcadDocument(create_new=False)
         _doc._me = doc
         return _doc
-    
+
     def unbind(self):
         self._me = None
         del self
-    
+
     def same(self, other):
         return self._me == other
-        
+
     def is_valid(self):
         try:
             self._me.Name
@@ -202,14 +203,14 @@ class AcadDocument(object):
             self._me.CopyObjects(obj, owner)
         else:
             self._me.CopyObjects(obj, owner, id_pairs)
-    
+
     @property
     def database(self):  # As AcadDatabase
         """
         Gets the database in which the object belongs
         """
         return self._me.Database
-        
+
     @property
     def dictionaries(self):  # As AcadDictionaries
         """
@@ -223,38 +224,38 @@ class AcadDocument(object):
         Gets the DimStyles collection for the document
         """
         return self._me.DimStyles
-    
+
     @property
     def elevationmodelspace(self) -> float:
         """
         Specifies the elevation setting in the model space
         """
         return self._me.ElevationModelSpace
-        
+
     @elevationmodelspace.setter
     def elevationmodelspace(self, value: float):
         self._me.ElevationModelSpace = value
-    
+
     @property
     def elevationpaperspace(self) -> float:
         """
         Specifies the elevation setting in the paper space
         """
         return self._me.ElevationPaperSpace
-        
+
     @elevationpaperspace.setter
     def elevationpaperspace(self, value: float):
         self._me.ElevationPaperSpace = value
-    
+
     def endundomark(self):
         self._me.EndUndoMark()
-    
+
     def export(self, file, ext, select):  # select As AcadSelectionSet
         """
         Exports the AutoCAD drawing to a WMF, SAT, EPS, DXF, or BMP format
         """
         self._me.Export(file, ext, select)
-    
+
     @property
     def fullname(self) -> str:
         """
@@ -291,14 +292,14 @@ class AcadDocument(object):
     @height.setter
     def height(self, value):
         self._me.Height = value
-    
+
     @property
     def hwnd(self):  # As LongPtr
         """
         Gets the window handle of the application window frame
         """
         return self._me.HWND
-    
+
     def imports(self, file: str, point, scale: float):
         """
         Imports a drawing file in SAT, EPS, DXF, or WMF format
@@ -311,7 +312,7 @@ class AcadDocument(object):
         Gets the Layers collection for the document
         """
         return self._me.Layers
-        
+
     @property
     def layouts(self):  # As AcadLayouts
         """
@@ -343,19 +344,58 @@ class AcadDocument(object):
         """
         self._me.load_shape_file(file)
 
+    @property
+    def materials(self):  # As AcadMaterials
+        """
+        Gets the Materials collection for the document
+        """
+        return self._me.Materials 
+
+    @property
+    def model_space(self):  # As AcadModelSpace
+        """
+        Gets the ModelSpace collection for the document
+        """
+        return self._me.ModelSpace 
+
+    @property
+    def model(self):  # As AcadModelSpace
+        """
+        Gets the ModelSpace collection for the document
+        """
+        return self.model_space 
+
+    @property
+    def mspace(self) -> bool:
+        """
+        Allows editing of the model from floating paper space viewports
+        """
+        return self._me.MSpace 
+
+    @mspace.setter
+    def mspace(self, value: bool):
+        self._me.MSpace = value
+
+    @property
+    def name(self) -> str:
+        """
+        Specifies the name of the document
+        """
+        return self._me.Name 
+
     @staticmethod
     def new(template: str):
         """
         Creates a new document in SDI mode
         """
         return AcadDocument(template)
-    
+
     def obj_id_to_object(self, object_id):
         """
         Gets the object that corresponds to the given object ID
         """
         return self._me.ObjectIdToObject(object_id)
-    
+
     @property
     def object_snap_mode(self) -> bool:
         """
@@ -366,16 +406,220 @@ class AcadDocument(object):
     @object_snap_mode.setter
     def object_snap_mode(self, value: bool):
         self._me.ObjectSnapMode = value
-    
+
     @staticmethod
     def open(file: str, read_only=False, password=None):
+        """
+        Open AutoCAD document
+        """
         from .application import acad_docs
         return acad_docs.open(file, read_only, password)
-    
 
+    @property
+    def paperspace(self):  # As AcadPaperSpace
+        """
+        Gets the PaperSpace collection for the document
+        """
+        return self._me.PaperSpace 
 
+    @property
+    def path(self) -> str:
+        """
+        Gets the path of the document, application, or external reference
+        """
+        return self._me.Path 
 
+    @property
+    def pick_first_selection_set(self):  # As AcadSelectionSet
+        """
+        Gets the pickfirst selection set
+        """
+        return self._me.PickfirstSelectionSet 
 
+    @property
+    def plot(self):  # As AcadPlot
+        """
+        Gets the Plot object for the document
+        """
+        return self._me.Plot 
+
+    @property
+    def plot_configurations(self):  # As AcadPlotConfigurations
+        """
+        Gets the PlotConfigurations collection for the document
+        """
+        return self._me.PlotConfigurations 
+
+    def post_command(self, command: str):
+        """
+        Posts a command string from a VB or VBA application to the document for processing.
+        Posts a command string to the document for execution when the document enters an idle state.
+        """
+        self._me.PostCommand(command)
+
+    @property
+    def preferences(self):  # As AcadDatabasePreferences
+        """
+        Gets the Preferences object
+        """
+        return self._me.Preferences 
+
+    def purge_all(self):
+        """
+        Removes unused named references such as unused blocks or layers from the document
+        """
+        self._me.PurgeAll()
+
+    @property
+    def readonly(self) -> bool:
+        """
+        Specifies if the document is read-only or read-write
+        """
+        return self._me.ReadOnly 
+
+    def regen(self, all_viewports=False):
+        """
+        Regenerates the entire drawing and recomputes the screen coordinates and view resolution for all objects
+        """
+        # originaly used AcRegenType enum
+        # acActiveViewport = 0
+        # acAllViewports = 1
+        self._me.Regen(int(all_viewports))
+
+    @property
+    def registered_applications(self):  # As AcadRegisteredApplications
+        """
+        The collection of all registered applications in the drawing
+        """
+        return self._me.RegisteredApplications 
+    from .enum import AcSaveAsType
+    def save(self, file="", type=AcSaveAsType.acUnknown,security=None):
+        """
+        Saves the document or menu group to a specified file
+        """
+        if len(file) == 0:
+            self._me.Save()
+        else:
+            if type==AcSaveAsType.acUnknown and security is None:
+                self._me.SaveAs(file)
+            elif security is None:
+                self._me.SaveAs(file, type)
+            else:
+                self._me.SaveAs(file, type, security)
+
+    @property
+    def saved(self) -> bool:
+        """
+        Specifies if the document has any unsaved changes
+        """
+        return self._me.Saved 
+
+    @property
+    def section_manager(self):  # As AcadSectionManager
+        """
+        Returns the section manager object
+        """
+        return self._me.SectionManager 
+
+    @property
+    def selection_sets(self):  # As AcadSelectionSets
+        """
+        Gets the SelectionSets collection for the document
+        """
+        return self._me.SelectionSets 
+
+    def send_command(self, command):
+        """
+        Sends a command string from a VB or VBA application to the document for processing.
+        """
+        self._me.SendCommand(command)
+
+    def SetVariable(self, name: str, value):
+        """
+        Sets the value of an AutoCAD system variable
+        """
+        self._me.SetVariable(name, value)
+
+    @property
+    def summary_info(self):  # As AcadSummaryInfo
+        """
+        Returns the summary info object.
+        """
+        return self._me.SummaryInfo 
+
+    @property
+    def text_styles(self):  # As AcadTextStyles
+        """
+        Gets the TextStyles collection for the document
+        """
+        return self._me.TextStyles 
+
+    @property
+    def user_coordinate_systems(self):  # As AcadUCSs
+        """
+        Gets the UCSs collection for the document
+        """
+        return self._me.UserCoordinateSystems 
+
+    @property
+    def utility(self):  # As AcadUtility
+        """
+        Gets the Utility object for the document
+        """
+        return self._me.Utility 
+
+    @property
+    def viewports(self):  # As AcadViewports
+        """
+        Gets the Viewports collection for the document
+        """
+        return self._me.Viewports 
+
+    @property
+    def views(self):  # As AcadViews
+        """
+        Gets the Views collection for the document
+        """
+        return self._me.Views 
+
+    def wblock(self, file: str, selects):  # selects as AcadSelectionSet
+        """
+        Writes out the given selection set as a new drawing file
+        """
+        self._me.Wblock(file, selects)
+
+    @property
+    def width(self) -> int:
+        """
+        Specifies the width of the text boundary, view, image, toolbar, or main application window
+        """
+        return self._me.Width 
+
+    @width.setter
+    def width(self, value: int):
+        self._me.Width = value
+
+    @property
+    def window_state(self):  # As AcWindowState
+        """
+        Specifies the state of the application or document window
+        """
+        return self._me.WindowState 
+
+    @window_state.setter
+    def window_state(self, value):
+        self._me.WindowState = value
+
+    @property
+    def window_title(self) -> str:
+        """
+        Gets the title of the document window
+        """
+        return self._me.WindowTitle 
+
+    @property
+    def get_raw(self):
+        return self._me
 
     """
     events:
@@ -404,10 +648,9 @@ class AcadDocument(object):
         ObjectAdded
         ObjectErased
         ObjectModified
-        
-        
-        
-        
+        SelectionChanged
+        WindowChanged
+        WindowMovedOrResized
     """
 
 

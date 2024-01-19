@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 #Some enums ported from AutoCAD VBA. Based on AutoCAD 2018
 
 import enum

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from pyautocad import Autocad
 
 # Global Autocad Automation object
@@ -31,13 +34,13 @@ class AcadApplication(object):
         """
         Specifies the active document (drawing file)
         """
-        from .document import AcadDocument
-        return AcadDocument.from_app(self._me.ActiveDocument)
+        return acad_docs.get_by_doc(self._me.ActiveDocument)
 
     from .document import AcadDocument
     @doc.setter
     def doc(self, value: AcadDocument):
-        self._me.ActiveDocument = value._me
+        value.activate()
+        #self._me.ActiveDocument = value._me
 
     @property
     def docs(self):
@@ -360,24 +363,27 @@ acad_app = AcadApplication()
 
 class AcadDocuments:
     def __init__(self):
-        self._me = acad_app.docs
+        self._me = acad_app.docs_coll
         self._docs = []
         for doc in self._me:
             from .document import AcadDocument
             self._docs.append(AcadDocument.from_app(doc))
     
-    def add(self, template: str):
+    def add(self, template="acad", switch_to=True):
         """
         Creates a member object and adds it to the appropriate collection
         """
+        doc = acad_app.doc
         from .document import AcadDocument
         self._docs.append(
             AcadDocument.from_app(
                 self._add(template)))
+        if not switch_to:
+            acad_app.doc = doc
         return self._docs[-1]
     
     def _add(self, template):
-        return self._me.Add(template)
+        return self._me.Add(str(template))
     
     def close(self):
         """
@@ -401,6 +407,13 @@ class AcadDocuments:
         for doc in self:
             if doc.name == name:
                 return doc
+    
+    def get_by_doc(self, acaddoc):
+        self._update()
+            for doc in self:
+                if doc.same(acaddoc):
+                    return doc
+        return None
 
     def open(self, path:str, read_only=False, password=None):
         if password is None:
@@ -439,3 +452,7 @@ class AcadDocuments:
 # Global AutoCAD AcadDocuments object
 acad_docs = AcadDocuments()
 
+__all__ = (
+    "acad_app",
+    "acad_docs",
+)
