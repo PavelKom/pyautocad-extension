@@ -29,3 +29,6 @@ print(dll2)
 coll = CreateObject(dll2.Collection)
 print(coll)
 print(coll.Count())
+
+# For PowerShell
+# (Get-WmiObject Win32_OperatingSystem).SystemDrive for getting OS drive
