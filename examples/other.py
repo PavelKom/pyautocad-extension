@@ -1,7 +1,7 @@
 import pythoncom, win32com.client, comtypes
 from comtypes.client import GetModule, CreateObject
 from ctypes import c_int, c_char_p
-
+'''
 # https://timgolden.me.uk/pywin32-docs/pythoncom.html
 # Get VBA dll and iterate all types
 dll = pythoncom.LoadTypeLib('C:\\Program Files\\Common Files\\microsoft shared\\VBA\\VBA7.1\\apc71.dll')
@@ -22,7 +22,7 @@ for index in range(0, dll.GetTypeInfoCount()):
 	#except:
 	#	pass
 print("a")
-
+'''
 # Creating COM object from dll
 dll2 = GetModule(
     'C:\\Program Files\\Common Files\\microsoft shared\\VBA\\VBA7.1\\apc71.dll')

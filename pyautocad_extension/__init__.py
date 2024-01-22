@@ -26,19 +26,19 @@ def get_win_os_disk() -> str:
 	:return: Disk symbol
 	"""
 	import subprocess
-	process = subprocess.Popen("where powershell", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	process = subprocess.Popen("where powershell", stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags = subprocess.CREATE_NO_WINDOW)
 	stdout, stderr = process.communicate()
 	stdout = stdout.decode('utf-8')
 	powershell_path = stdout.strip()
 	return powershell_path[0]
 
-
+'''
 # AutoCAD
 from .application import *
 from .document import *
 from .enum import *
 from .geometry import *
 from .blocks import *
-
+'''
 # VBA
 from .vba import *

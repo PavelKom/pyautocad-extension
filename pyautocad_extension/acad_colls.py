@@ -9,8 +9,6 @@ class _AcadCollPre(AcadObject):
 	"""
 	Intermediate class for all collection-type Acad objects.
 	"""
-	BLOCKED_ATTRIBUTES = ()
-
 	def __init__(self, obj, parent=None):
 		"""
 		Intermediate class for all collection-type Acad objects.
@@ -135,12 +133,6 @@ class _AcadCollPre(AcadObject):
 			if _item.raw == item:
 				return True
 		return False
-
-	# Used for blocking some attributes, like 'add', 'document', etc.
-	def __getattribute__(self, attribute):
-		if attribute in self.BLOCKED_ATTRIBUTES:
-			raise AttributeError("Attribute '{0}' not allowed for {1}".format(attribute, type(self)))
-		return super().__getattribute__(attribute)
 
 
 class AcadBlocks(_AcadCollPre):
