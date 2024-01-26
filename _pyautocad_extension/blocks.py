@@ -4,32 +4,8 @@ from .object import AcadObject
 from pyautocad import APoint
 
 
-def _cont(var):
-	try:
-		res = []
-		for v in var:
-			res.extend(_cont(v))
-		return res
-	except:
-		return [var]
 
 
-def _check(var, t):
-	try:
-		for item in var:
-			if not isinstance(item, t):
-				raise TypeError("Variable '{0}' from '{1}' must be '{2}'".format(item, var, t))
-	except:
-		if not isinstance(var, t):
-			raise TypeError("Variable '{0}' must be '{1}'".format(var, t))
-
-
-def _fix_dict(kw: dict):
-		# Remove all items with None value
-		# Usefull for omits Optional args
-		for k, v in kw.items():
-			if v is None:
-				kw.pop(k)
 
 
 # Adder class

@@ -1,32 +1,104 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from pyautocad import Autocad
+#from pyautocad import Autocad
+
+from comtypes.client import GetModule, CreateObject, GetActiveObject
+from pathlib import Path
+from . import get_win_os_disk
 
 # Global Autocad Automation object
 # Autoopen application, because it's REALLY necessary
-acad = Autocad(True)
+#acad = Autocad(True)
 
-
-class AcadApplication(object):
+class AcadDLL:
+	_adll = None
+	_path = ""
+	_dll = None
+	_version = ""
+	# Avoid multiply connections.
+	def __new__(cls, *args, **kwargs):
+		if AcadDLL._adll is None:
+			return super().__new__(cls)
+		return AcadDLL._adll
+	
 	def __init__(self):
-		self._me = acad.app
-
-	@property
-	def app(self):
 		"""
-		Gets the Application object
-		Kinda sus
+		Create Autocad library manager
 		"""
-		#return self._me.Application
-		return self._me
-
+		p = Path(get_win_os_disk() + r":\Program Files\Common Files\Autodesk Shared")
+		for f in p.rglob("acax*enu.tlb"):
+			self._path = str(f)
+		self._version = self._path.split("\\")[-1].replace("acax", "").replace("enu.tlb", "")
+		self._dll = GetModule(self._path)
+		AcadDLL._adll = self
+	
 	@property
-	def cap(self) -> str:
+	def dll(self):
+		return self._dll
+		
+	@property
+	def path(self):
+		return self._path
+	
+	@property
+	def version(self):
+		return self._version
+
+	def get_types_info(self) -> tuple:
+		import pythoncom
+		dll = pythoncom.LoadTypeLib(self._path)
+		return [dll.GetDocumentation(index) for index in range(0, dll.GetTypeInfoCount())]
+	
+	def get_my_dir(self):
+		return dir(self._dll)
+		
+	def __call__(self):
+		return self._dll
+
+# Global AutoCAD library manager
+cad_dll = AcadDLL()
+
+class AcadApplication(AcadObject):
+	
+
+	def __init__(self, create_if_not_exists=True, always_new=False, visible=True, sink=None):
+		if always_new:
+			# NOT DYNAMIC. Because dynamic cast used IDispatch, and Events not working
+			self._me = CreateObject(cad_dll.AcadAppliation)
+		else:
+			try:
+				self._me = GetActiveObject(cad_dll.AcadAppliation)
+			except WindowsError:
+				if not create_if_not_exists:
+                    raise
+				else:
+					self._me = CreateObject(cad_dll.AcadAppliation)
+		self.Visible = visible
+		self._documents = AcadDocuments(self, sink)
+		self._menubar = AcadMenuBar(self, sink)
+		self._menugroups = AcadMenuGroups(self, sink)
+		self._Preferences = AcadPreferences(self, sink)
+
+	# VBA-Properties
+	@property
+	def Application(self):
+		return self
+	
+	application = Application
+	app = Application
+	
+	@property
+	def Caption(self) -> str:
 		"""
 		Gets the text that the user sees displayed for the application or a menu item
 		"""
 		return self._me.Caption
+	
+	caption = Caption
+	cap = Caption
+	
+	
 
 	@property
 	def doc(self):
