@@ -5,7 +5,7 @@ from comtypes import POINTER
 from comtypes.automation import IDispatch
 from comtypes.client import GetEvents
 from .api import acad_dll as _dll
-from .utils import arr_check, recast as _recast
+from .util import arr_check, recast as _recast, COM_Property, COM_PropertyRecast, non_neg
 from ctypes import c_short
 from pyautocad import APoint
 import array
@@ -17,6 +17,15 @@ class A3Vertex(APoint):
 	X = x
 	Y = y
 	Z = z
+	@property
+	def as2D(self):
+		return self[:2]
+		
+    def __str__(self):
+        return 'A3Vertex(%.2f, %.2f, %.2f)' % tuple(self)
+	
+	def __abs__(self):
+		return A3Vertex(abs(self.x), abs(self.y), abs(self.z))
 	
 class A2Vertex(array.array):
 	pass # ToDo: For 2d points, for LWPolylines
@@ -75,7 +84,7 @@ class _EventCaller:
 				del conn
 		
 
-class AcadObject(POINTER(_dll.IAcadObject)):
+class AcadObject(POINTER(_dll.IAcadObject), _EventCaller):
 	_BLOCKED_ATTRIBUTES = ()
 	_EVENT_CONNECTIONS = {}
 	def __new__(cls, *args, **kwargs):
@@ -154,14 +163,12 @@ class AcadObject(POINTER(_dll.IAcadObject)):
 	def getextensiondictionary(self):
 		obj = super().GetExtensionDictionary()
 		return _recast(obj)
-	get_extension_dictionary = getextensiondictionary
 	def getxdata(self, AppName: str, XDataType: list = list(), XDataValue: list = list()):
 		# ToDo: maybe array.array or something else?
 		XDataType.clear()
 		XDataValue.clear()
 		super().GetXData(AppName, XDataType, XDataValue)
 		return XDataType, XDataValue
-	get_xdata = getxdata
 	def setxdata(self, XDataType: list[c_short], XDataValue: list):
 		arr_check(XDataType, c_short)
 		if len(XDataType) != len(XDataValue):
@@ -170,30 +177,23 @@ class AcadObject(POINTER(_dll.IAcadObject)):
 	set_xdata = setxdata
 	
 	# VBA-properties with recasting
-	
+	"""
 	@property
 	def application(self):
 		from .application import AcadApplication
 		app = super().Application
 		app.__class__ = AcadApplication
 		return app
-	app = application
-	@property
-	def document(self):
-		from .document import AcadDocument
-		doc = super().Document
-		doc.__class__ = AcadDocument
-		return doc
-	doc = document
-	# Handle<String> - without changes
-	# HasExtensionDictionary<bool>- without changes
-	has_extension_dictionary = HasExtensionDictionary
-	# ObjectID<Long_Ptr> - without changes ???????
-	object_id = ObjectID
-	# ObjectName<String> - without changes
-	object_name = ObjectName
-	# OwnerID<Long_Ptr> - without changes ???????
-	owner_id = OwnerID
+	"""
+	application = COM_PropertyRecast("Application", None, True)
+	document = COM_PropertyRecast("Document", None, True)
+	handle = COM_Property("Handle", str, None, True)
+	hasextensiondictionary = COM_Property("HasExtensionDictionary", bool, None, True)
+	objectid = COM_Property("ObjectID", int, None, True)# <Long_Ptr>???????
+	objectname = COM_Property("ObjectName", str, None, True)
+	object_name = objectname
+	ownerid = COM_Property("OwnerID", int, None, True)# <Long_Ptr>???????
+	owner_id = ownerid
 
 
 class AcadEntity(POINTER(_dll.IAcadEntity), AcadObject):
@@ -226,8 +226,8 @@ class AcadEntity(POINTER(_dll.IAcadEntity), AcadObject):
 		super().GetBoundingBox(MinPoint, MaxPoint)
 		return MinPoint, MaxPoint
 	get_bounding_box = getboundingbox
-	# GetExtensionDictionary - from parent
-	# GetXData - from parent
+	getextensiondictionary = AcadObject.getextensiondictionary
+	getxdata = AcadObject.getxdata
 	# Highlight<bool> - without changes
 	def intersectwith(self, IntersectObject:AcadEntity, ExtendOption:int):
 		# ExtendOption is AcExtendOption enum
@@ -242,51 +242,45 @@ class AcadEntity(POINTER(_dll.IAcadEntity), AcadObject):
 	# Rotate - without changes
 	# Rotate3D - without changes
 	# ScaleEntity - without changes
-	scale_entity = ScaleEntity
-	# SetXData - from parent
+	setxdata = AcadObject.setxdata
 	def transformby(self, TransformationMatrix: ATrMatrix):
 		super().TransformBy(TransformationMatrix) # ToDo: need test!!!
-	transform_by = transformby
 	# Update - without changes
 	
 	# VBA-properties with recasting
-	
-	# Application<AcadApplication> - from parent
-	# Document<AcadDocument> - from parent
-	# EntityTransparency<String> - from parent
-	entity_transparency = EntityTransparency
-	# Handle<String> - without changes
-	# HasExtensionDictionary<bool>- without changes. Alias from parent
-	@property
-	def hyperlinks(self):
-		return _recast(super().Hyperlinks)
-	# Layer<String> - without changes
-	# Linetype<String> - without changes
-	# LinetypeScale<Double> - without changes
-	linetype_scale = LinetypeScale
-	# Lineweight<acLineWeight enum> - without changes
-	# Material<String> - without changes
-	# ObjectID<Long_Ptr> - without changes. Alias from parent
-	# ObjectName<String> - without changes. Alias from parent
-	# OwnerID<Long_Ptr> - without changes. Alias from parent
-	# PlotStyleName<String> - without changes
-	@property
-	def truecolor(self):
-		return _recast(super().TrueColor)
+	application = AcadObject.application
+	document = AcadObject.document
+	# TODO: CONTINUE FROM THIS
+	entitytransparency = COM_Property("EntityTransparency", str, value_wrapper=str_as_transparency)
+	entity_transparency = entitytransparency
+	hyperlinks = COM_PropertyRecast("Hyperlinks", None, True)
+	layer = COM_Property("Layer", str)
+	linetype = COM_Property("Linetype", str, value_wrapper=str_as_linetype)
+	linetypescale = COM_Property("LinetypeScale", float, value_wrapper=non_neg)
+	linetype_scale = linetypescale
+	lineweight = COM_Property("Lineweight", int) # <acLineWeight enum>
+	material = COM_Property("Material", str)
+	truecolor = COM_PropertyRecast("TrueColor", AcadAcCmColor)
 	true_color = truecolor # TOO UGLY
-	# Visible<bool> - without changes
+	visible = COM_Property("Visible", bool)
 	
 	
-class AcadDictionary(POINTER(_dll.IAcadDictionary), AcadObject):
+class AcadDictionary(AcadObject, POINTER(_dll.IAcadDictionary)):
 	def __new__(cls, source=None):
 		if source is None:
+			app = AcadApplication()
+			doc = app.ActiveDocument if app.Documents.Count > 0 else app.Documents.Add()
+			source = doc.Dictionaries
+		return _recast(source.Add())
 		
 	def __str__(self):
 		try:
 			hndl = self.handle
+			doc = self.document
 		except:
-			hndl = "None"
-		return "AutoCAD Dictionary object\n\tHandle: {0}".format(hndl)
+			hndl = "INVALID"
+			doc = "INVALID"
+		return "AutoCAD Dictionary object\n\tHandle: {0}\n\tDocument: {1}".format(hndl, doc)
 	# VBA-methods with recasting
 	# AddObject(<String>, <String>)<Object> - idk. need test
 	def addxrecord(self, Keyword: str):
@@ -297,6 +291,8 @@ class AcadDictionary(POINTER(_dll.IAcadDictionary), AcadObject):
 	def getobject(self, Name: str):
 		return _recast(super().GetObject(Name))
 	get_object = getobject
+	def item(self, index):
+		return _recast(super().Item(index))
 	def remove(self, Name:str):
 		return _recast(super().Remove(Name))
 	# Rename(<String>, <String>) - without changes
@@ -304,15 +300,29 @@ class AcadDictionary(POINTER(_dll.IAcadDictionary), AcadObject):
 	
 	# VBA-properties with recasting
 	
-	# Application<AcadApplication> - from parent
-	# Count<int> - without changes
-	# Document<AcadDocument> - from parent
-	# Handle<String> - without changes
-	# HasExtensionDictionary<bool>- without changes. Alias from parent
-	# Name<String> - without changes
-	# ObjectID<Long_Ptr> - without changes. Alias from parent
-	# ObjectName<String> - without changes. Alias from parent
-	# OwnerID<Long_Ptr> - without changes. Alias from parent
+	count = COM_Property("Count", int, None, True)
+	name = COM_Property("Name", str)
 
 
+def str_as_transparency(value: (str, int)):
+	if str_as_transparency.d is None:
+		str_as_transparency.d = ("ByLayer", "ByBlock")
+	if isinstance(value, int) or try_me(int, value):
+		value = int(value)
+		if value > 90:
+			return "90"
+		elif value < 0:
+			return "0"
+		value = str(value)
+	else:
+		if value not in str_as_transparency.d:
+			raise ValueError("[AcadEntity.EntityTransparency] Value must be 0-90 or {0}".format(str_as_transparency.d))
+	return value
 
+
+def str_as_linetype(value: str):
+	if str_as_linetype.d is None:
+		str_as_linetype.d = ("Continuous", "ByLayer", "ByBlock")
+	if value not in str_as_linetype.d:
+		raise ValueError("[AcadEntity.Linetype] Value must be {0}".format(str_as_linetype.d))
+	return value

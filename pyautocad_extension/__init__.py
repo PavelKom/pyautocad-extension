@@ -32,8 +32,10 @@ def get_win_os_disk() -> str:
 	powershell_path = stdout.strip()
 	return powershell_path[0]
 
-'''
+
 # AutoCAD
+from .api import *
+'''
 from .application import *
 from .document import *
 from .enum import *

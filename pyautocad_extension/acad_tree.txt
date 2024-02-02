@@ -1,38 +1,36 @@
 Used for visualisation inherits Autocad classes
 ─ │ ┌ ┐ └ ┘ ├ ┤ ┬ ┴ ┼ ═ ║ ╒ ╓ ╔ ╕ ╖ ╗ ╘ ╙ ╚ ╛ ╜ ╝ ╞ ╟ ╠ ╡ ╢ ╣ ╤ ╥ ╦ ╧ ╨ ╩ ╪ ╫ ╬
-class, recast, hndl, no_hndl, iter, can_create, can_not_create, evnt, no_event
+class, recast, hndl, no_hndl, iter, can_create, can_not_create, event, no_event, __str__
 Object
 	├─ AcadState | 
 	├─ AcadAcCmColor | 
 	├─ AcadApplication | 
-	├─ AcadObject | class , can recast???, hndl, can_not_create
-	│	├─ AcadEntity | class, can recast???, hndl, can_not_create
-	│	│	├─ Acad3DFace | 
-	│	│	├─ Acad3DPolyline | 
-	│	│	├─ Acad3DSolid | 
-	│	│	├─ AcadArc | 
-	│	│	├─ AcadAttribute | 
-	│	│	├─ AcadAttributeReference | 
-	│	│	├─ AcadBlockReference | 
-	│	│	│	├─ AcadExternalReference | 
-	│	│	│	│	├─ AcadComparedReference | 
-	│	│	│	├─ AcadMInsertBlock | 
-	│	│	├─ AcadCircle | 
-	│	│	├─ AcadDimension | 
-	│	│	│	├─ AcadDim3PointAngular | 
-	│	│	│	├─ AcadDimAligned | 
-	│	│	│	├─ AcadDimAngular | 
-	│	│	│	├─ AcadDimArcLength | 
-	│	│	│	├─ AcadDimDiametric | 
-	│	│	│	├─ AcadDimOrdinate | 
-	│	│	│	├─ AcadDimRadial | 
-	│	│	│	├─ AcadDimRadialLarge | 
-	│	│	│	├─ AcadDimRotated | 
-	│	│	├─ AcadDimStyle | 
-	│	│	├─ AcadDimStyles | 
-	│	│	├─ AcadEllipse | 
+	├─ AcadObject | class , can recast???, hndl, can_not_create, event, __str__
+	│	├─ AcadEntity | class, can recast???, hndl, can_not_create, event, __str__
+	│	│	├─ Acad3DFace | class, hndl, iter, can_create, event
+	│	│	├─ Acad3DPolyline | class, hndl, iter, can_create, event
+	│	│	├─ Acad3DSolid | class, hndl, can_create, event
+	│	│	├─ AcadArc | class, hndl, can_create, event
+	│	│	├─ AcadAttribute | class, hndl, can_create, event
+	│	│	├─ AcadAttributeReference | class, hndl, can_not_create, event
+	│	│	├─ AcadBlockReference | class, hndl, can_create, event
+	│	│	│	├─ AcadExternalReference | class, hndl, can_create, event
+	│	│	│	│	├─ AcadComparedReference | class, hndl, can_not_create, event
+	│	│	│	├─ AcadMInsertBlock | class, hndl, can_create, event
+	│	│	├─ AcadCircle | class, hndl, can_create, event
+	│	│	├─ AcadDimension | class, hndl, can_not_create, event
+	│	│	│	├─ AcadDim3PointAngular | class, hndl, can_create, event
+	│	│	│	├─ AcadDimAligned | class, hndl, can_create, event
+	│	│	│	├─ AcadDimAngular | class, hndl, can_create, event
+	│	│	│	├─ AcadDimArcLength | class, hndl, can_create, event
+	│	│	│	├─ AcadDimDiametric | class, hndl, can_create, event
+	│	│	│	├─ AcadDimOrdinate | class, hndl, can_create, event
+	│	│	│	├─ AcadDimRadial | class, hndl, can_create, event
+	│	│	│	├─ AcadDimRadialLarge | class, hndl, can_create, event
+	│	│	│	├─ AcadDimRotated | class, hndl, can_create, event
+	│	│	├─ AcadEllipse | class, hndl, can_create, event
 	│	│	├─ AcadGeoPositionMarker | 
-	│	│	├─ AcadHatch | 
+	│	│	├─ AcadHatch | class, hndl, can_create, event
 	│	│	├─ AcadHelix | 
 	│	│	├─ AcadLeader | 
 	│	│	├─ AcadLWPolyline | 
@@ -78,8 +76,9 @@ Object
 	│	│	├─ AcadPaperSpace | 
 	│	├─ AcadBlocks | 
 	│	├─ AcadDictionaries | 
-	│	├─ AcadDictionary | class, iter
+	│	├─ AcadDictionary | class, iter, hndl, can_create, event
 	│	├─ AcadDimStyle | 
+	│	├─ AcadDimStyles | 
 	│	├─ AcadGroup | 
 	│	├─ AcadGroups | 
 	│	├─ AcadLayer | 
