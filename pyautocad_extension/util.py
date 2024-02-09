@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from .types import com_parse_dict
 from .block import AcadBlock
-from .object import A3Vertex
+from .object import A3Vertex, A3Vertexes, A2Vertex, A2Vertexes
 import math
 
 
@@ -66,7 +66,7 @@ class COM_PropertyRecast(object):
 	Example:
 	class AcadObject(POINTER(_dll.IAcadObject)):
 		...
-		application = COM_Property("Application", read_only=True)
+		application = COM_PropertyRecast("Application", AcadApplication, read_only=True)
 		...
 	"""
 	def __init__(self, ffunc: str, type_get=None, type_set=None, read_only: bool=False):
@@ -200,6 +200,11 @@ def angle_degree_scope(value: float):
 def str_cut256(value: str):
 	if len(value) > 256: return value[:256]
 	return value
+
+
+def vertexes_flatten(vtx: (A3Vertexes, A2Vertexes)):
+	return vtx.flatten()
+
 
 
 

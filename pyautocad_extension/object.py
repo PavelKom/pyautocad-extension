@@ -4,12 +4,14 @@
 from comtypes import POINTER
 from comtypes.automation import IDispatch
 from comtypes.client import GetEvents
-from .api import acad_dll as _dll
+from .api import acad_dll
 from .util import arr_check, recast as _recast, COM_Property, COM_PropertyRecast, non_neg
 from ctypes import c_short
 from pyautocad import APoint
 import array
 import numpy as np
+
+_dll = acad_dll.dll
 
 pattern1 = "_.*_"
 
@@ -238,10 +240,14 @@ class AcadEntity(POINTER(_dll.IAcadEntity), AcadObject):
 	
 	def mirror3d(self, Point1: A3Vertex, Point2: A3Vertex, Point3: A3Vertex):
 		return _recast(super().Mirror3D(Point1, Point2, Point3))
-	# Move - without changes
-	# Rotate - without changes
-	# Rotate3D - without changes
-	# ScaleEntity - without changes
+	def move(self, Point1: A3Vertex, Point2: A3Vertex):
+		super().Move(Point1, Point2)
+	def rotate(self, BasePoint: A3Vertex, RotationAngle: float):
+		super().Rotate(BasePoint, RotationAngle)
+	def rotate3d(self, Point1: A3Vertex, Point2: A3Vertex, RotationAngle: float):
+		super().Rotate3D(Point1, Point2, RotationAngle)
+	def scaleentity(self, BasePoint: A3Vertex, ScaleFactor: float):
+		super().ScaleEntity(BasePoint, ScaleFactor)
 	setxdata = AcadObject.setxdata
 	def transformby(self, TransformationMatrix: ATrMatrix):
 		super().TransformBy(TransformationMatrix) # ToDo: need test!!!
@@ -250,9 +256,10 @@ class AcadEntity(POINTER(_dll.IAcadEntity), AcadObject):
 	# VBA-properties with recasting
 	application = AcadObject.application
 	document = AcadObject.document
-	# TODO: CONTINUE FROM THIS
 	entitytransparency = COM_Property("EntityTransparency", str, value_wrapper=str_as_transparency)
 	entity_transparency = entitytransparency
+	handle = AcadObject.handle
+	hasextensiondictionary = AcadObject.hasextensiondictionary
 	hyperlinks = COM_PropertyRecast("Hyperlinks", None, True)
 	layer = COM_Property("Layer", str)
 	linetype = COM_Property("Linetype", str, value_wrapper=str_as_linetype)
@@ -260,12 +267,16 @@ class AcadEntity(POINTER(_dll.IAcadEntity), AcadObject):
 	linetype_scale = linetypescale
 	lineweight = COM_Property("Lineweight", int) # <acLineWeight enum>
 	material = COM_Property("Material", str)
+	objectid = AcadObject.objectid
+	objectname = AcadObject.objectname
+	ownerid = AcadObject.ownerid
+	plotstylename = COM_Property("PlotStyleName", str)
 	truecolor = COM_PropertyRecast("TrueColor", AcadAcCmColor)
 	true_color = truecolor # TOO UGLY
 	visible = COM_Property("Visible", bool)
 	
 	
-class AcadDictionary(AcadObject, POINTER(_dll.IAcadDictionary)):
+class AcadDictionary(POINTER(_dll.IAcadDictionary), AcadObject):
 	def __new__(cls, source=None):
 		if source is None:
 			app = AcadApplication()
@@ -282,26 +293,39 @@ class AcadDictionary(AcadObject, POINTER(_dll.IAcadDictionary)):
 			doc = "INVALID"
 		return "AutoCAD Dictionary object\n\tHandle: {0}\n\tDocument: {1}".format(hndl, doc)
 	# VBA-methods with recasting
-	# AddObject(<String>, <String>)<Object> - idk. need test
+	def addobject(Keyword: str, ObjectName: str):
+		return _recast(super().AddObject(Keyword, ObjectName))
+	add_object = addobject
 	def addxrecord(self, Keyword: str):
 		# return <XRecord>
 		return _recast(super().AddXRecord(Keyword))
 	add_xrecord = addxrecord
+	# Delete() - without changing
+	getextensiondictionary = AcadObject.getextensiondictionary
 	# GetName(<Object>)<String> - without changes
 	def getobject(self, Name: str):
 		return _recast(super().GetObject(Name))
 	get_object = getobject
+	getxdata = AcadObject.getxdata
 	def item(self, index):
 		return _recast(super().Item(index))
 	def remove(self, Name:str):
 		return _recast(super().Remove(Name))
 	# Rename(<String>, <String>) - without changes
 	# Replace(<String>, <Object>) - without changes
+	setxdata = AcadObject.setxdata
 	
 	# VBA-properties with recasting
 	
+	application = AcadObject.application
 	count = COM_Property("Count", int, None, True)
+	document = AcadObject.document
+	handle = AcadObject.handle
+	hasextensiondictionary = AcadObject.hasextensiondictionary
 	name = COM_Property("Name", str)
+	objectid = AcadObject.objectid
+	objectname = AcadObject.objectname
+	ownerid = AcadObject.ownerid
 
 
 def str_as_transparency(value: (str, int)):

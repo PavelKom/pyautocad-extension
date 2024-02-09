@@ -65,7 +65,8 @@ class Acad3DFace(POINTER(_dll.IAcad3DFace), AcadEntity):
 	# VBA-properties with recasting
 	# Application<AcadApplication> - from parent
 	# @property # Maybe as method???
-	def coordinate(self, index: int):
+	coordinate = None
+	def get_coordinate(self, index: int):
 		return A3Vertex(super().Coordinate(index))
 	
 	def set_coordinate(self, index: int, value: A3Vertex):

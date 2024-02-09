@@ -29,22 +29,22 @@ Object
 	│	│	│	├─ AcadDimRadialLarge | class, hndl, can_create, event
 	│	│	│	├─ AcadDimRotated | class, hndl, can_create, event
 	│	│	├─ AcadEllipse | class, hndl, can_create, event
-	│	│	├─ AcadGeoPositionMarker | 
+	│	│	├─ AcadGeoPositionMarker | class, hndl, can_not_create, event
 	│	│	├─ AcadHatch | class, hndl, can_create, event
-	│	│	├─ AcadHelix | 
-	│	│	├─ AcadLeader | 
-	│	│	├─ AcadLWPolyline | 
-	│	│	├─ AcadLine | 
-	│	│	├─ AcadLoftedSurface | 
-	│	│	├─ AcadMLeader | 
-	│	│	├─ AcadMLine | 
-	│	│	├─ AcadMtext | 
-	│	│	├─ AcadOle | 
-	│	│	├─ AcadPoint | 
-	│	│	├─ AcadPointCloud | 
-	│	│	├─ AcadPointCloudEx | 
-	│	│	├─ AcadPolyfaceMesh | 
-	│	│	├─ AcadPolygonMesh | 
+	│	│	├─ AcadHelix | class, hndl, event
+	│	│	├─ AcadLeader | class, hndl, can_create, event
+	│	│	├─ AcadLWPolyline | class, hndl, can_create, event
+	│	│	├─ AcadLine | class, hndl, can_create, event
+	│	│	├─ AcadLoftedSurface | class, hndl, can_not_create, event
+	│	│	├─ AcadMLeader | class, hndl, can_create, event
+	│	│	├─ AcadMLine | class, hndl, can_create, event
+	│	│	├─ AcadMtext | class, hndl, can_create, event
+	│	│	├─ AcadOle | class, hndl, can_create, event
+	│	│	├─ AcadPoint | class, hndl, can_create, event
+	│	│	├─ AcadPointCloud | class, hndl, can_not_create, event
+	│	│	├─ AcadPointCloudEx | class, hndl, can_not_create, event
+	│	│	├─ AcadPolyfaceMesh | class, hndl, can_create, event
+	│	│	├─ AcadPolygonMesh | class, hndl, ???can_not_create???, event
 	│	│	├─ AcadPolyline | 
 	│	│	├─ AcadPViewport | 
 	│	│	├─ AcadRasterImage | 
