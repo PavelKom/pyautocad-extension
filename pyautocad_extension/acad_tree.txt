@@ -45,12 +45,12 @@ Object
 	│	│	├─ AcadPointCloudEx | class, hndl, can_not_create, event
 	│	│	├─ AcadPolyfaceMesh | class, hndl, can_create, event
 	│	│	├─ AcadPolygonMesh | class, hndl, ???can_not_create???, event
-	│	│	├─ AcadPolyline | 
-	│	│	├─ AcadPViewport | 
-	│	│	├─ AcadRasterImage | 
-	│	│	│	├─ AcadWipeout | 
-	│	│	├─ AcadRay | 
-	│	│	├─ AcadRegion | 
+	│	│	├─ AcadPolyline | class, hndl, can_create, event
+	│	│	├─ AcadPViewport | class, hndl, can_create, event
+	│	│	├─ AcadRasterImage | class, hndl, can_create, event
+	│	│	│	├─ AcadWipeout | class, hndl, can_not_create, event
+	│	│	├─ AcadRay | class, hndl, can_create, event
+	│	│	├─ AcadRegion | class, hndl, can_create, event
 	│	│	├─ AcadSection | 
 	│	│	├─ AcadShape | 
 	│	│	├─ AcadSolid | 

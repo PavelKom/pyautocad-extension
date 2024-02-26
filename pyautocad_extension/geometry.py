@@ -6,6 +6,7 @@ from .object import AcadEntity, A3Vertex, A3Vertexes, A2Vertex, A2Vertexes
 from .util import arr_check, recast as _recast, uncast as _uncast, dict_fix, get_obj_block_source, non_neg, angle_radian_scope, str_cut256, vertexes_flatten
 from multimethod import overload
 import math
+import ctypes
 
 
 """
@@ -1207,7 +1208,7 @@ def AcadLeader(POINTER(_dll.IAcadLeader), AcadEntity):
 		self.set_coordinate(index, value)
 	
 	
-	"""
+"""
 Object
 └─ AcadObject
 	└─ AcadEntity
@@ -1224,7 +1225,7 @@ def AcadLWPolyline(POINTER(_dll.IAcadLWPolyline), AcadEntity):
 		return obj
 
 	# VBA-methods with recasting
-	def AddVertex(self, Index: int, Point: A2Vertex):
+	def addvertex(self, Index: int, Point: A2Vertex):
 		super().AddVertex(Index, Point)
 	arraypolar = AcadEntity.arraypolar
 	arrayrectangular = AcadEntity.arrayrectangular
@@ -2048,12 +2049,12 @@ class AcadPolygonMesh(POINTER(_dll.IAcadPolygonMesh), AcadEntity):
 		return obj
 	'''	
 	# VBA-methods with recasting
+	def appendvertex(self, Point: A3Vertex):
+		super().AppendVertex(Point)
 	arraypolar = AcadEntity.arraypolar
 	arrayrectangular = AcadEntity.arrayrectangular
 	copy = AcadEntity.copy
 	# Delete - without changes
-	def appendvertex(self, Point: A3Vertex):
-		super().AppendVertex(Point)
 	def explode(self):
 		objs = super().Explode()
 		ret = []
@@ -2131,8 +2132,607 @@ def int_between_2_256(value: int):
 	return value
 	
 	
+"""
+Object
+└─ AcadObject
+	└─ AcadEntity
+		└─ AcadPolyline
+"""	
+class AcadPolyline(POINTER(_dll.IAcadPolyline), AcadEntity):
+	def __new__(cls, VerticesList: A3Vertexes, source: (AcadApplication, AcadDocument, AcadBlock)=None):
+		kw = {
+			"VerticesList": VerticesList.flatten()
+		}
+		_source = get_obj_block_source(source)
+		obj = _recast(_uncast(_source).AddPolyline(kw))
+		obj.connect_to_sink(_source.sink)
+		return obj
 	
 	
+	# VBA-methods with recasting
+	def appendvertex(self, Point: A3Vertex):
+		super().AppendVertex(Point)
+	arraypolar = AcadEntity.arraypolar
+	arrayrectangular = AcadEntity.arrayrectangular
+	copy = AcadEntity.copy
+	# Delete - without changes
+	def explode(self):
+		objs = super().Explode()
+		ret = []
+		for obj in objs:
+			ret.append(_recast(obj))
+			ret[-1].connect_to_sink(self.sink)
+		return ret
+	getboundingbox = AcadEntity.getboundingbox
+	# GetBulge(<int>)<double> - without changes
+	getextensiondictionary = AcadEntity.getextensiondictionary
+	def getwidth(self, Index: int , Width:dict=dict()):
+		"""
+		getwidth(Index: int, Width: dict=dict())
+			Width = {"StartWidth":float, "EndWidth": float}
+			return StartWidth, EndWidth
+		"""
+		# Python does not support passing arguments ByRef, ByVal like VBA. Therefore, we use a dictionary to return the changed values from the input arguments. We also do normal returns Output-only arguments.
+		if isinstance(Width["StartWidth"], float):
+			Width["StartWidth"] = ctypes.c_double(Width["StartWidth"])
+		elif not isinstance(Width["StartWidth"], ctypes.c_double):
+			Width["StartWidth"] =  ctypes.c_double(0.0)
+		if isinstance(Width["EndWidth"], float):
+			Width["EndWidth"] = ctypes.c_double(Width["EndWidth"])
+		elif not isinstance(Width["EndWidth"], ctypes.c_double):
+			Width["EndWidth"] =  ctypes.c_double(0.0)
+		super().GetWidth(Index, ctypes.byref(Width["StartWidth"]), ctypes.byref(Width["EndWidth"]))
+		Width["StartWidth"] = float(Width["StartWidth"])
+		Width["EndWidth"] = float(Width["EndWidth"])
+		return Width["StartWidth"], Width["EndWidth"]
+	getxdata = AcadEntity.getxdata
+	# Highlight<bool> - without changes
+	intersectwith = AcadEntity.intersectwith
+	mirror = AcadEntity.mirror
+	mirror3d = AcadEntity.mirror3d
+	move = AcadEntity.move
+	def offset(self, Distance: float):
+		obj = _recast(super().Offset(Distance))
+		obj.connect_to_sink(self.sink)
+		return obj
+	rotate = AcadEntity.rotate
+	rotate3d = AcadEntity.rotate3d
+	scaleentity = AcadEntity.scaleentity
+	# SetBulge(Index<int>, Value<float>)
+	# SetWidth (SegmentIndex<int>, StartWidth<float>, EndWidth<float>)
+	setxdata = AcadEntity.setxdata
+	transformby = AcadEntity.transformby
+	# Update - without changes
 	
+	# VBA-properties with recasting
+	application = AcadEntity.application
+	area = COM_Property("Area", float, None, True)
+	closed = COM_Property("Closed", bool)
+	constantwidth = COM_Property("ConstantWidth", float)
+	@deprecated
+	def coordinate(self, *args, **kw):
+		raise DeprecationWarning("Don't use Coordinate(i) for getting/setting point coordinat.e\nJust get/set item like array AcadLWPolyline[i].\nOr use get_coordinate / set_coordinate for getting/setting point coordinate.")
+	def get_coordinate(self, index: int):
+		return A2Vertex(super().Coordinate(index))
+	def set_coordinate(self, index: int, pos: A2Vertex):
+		super().Coordinate(index) = pos
+	coordinates = COM_Property("Coordinates", A2Vertexes, value_wrapper=vertexes_flatten)
+	document = AcadEntity.document
+	elevation = COM_Property("Elevation", float)
+	entitytransparency = AcadEntity.entitytransparency
+	handle = AcadEntity.handle
+	hasextensiondictionary = AcadEntity.hasextensiondictionary
+	hyperlinks = AcadEntity.hyperlinks
+	layer = AcadEntity.layer
+	length = COM_Property("Length", float, None, True)
+	linetype = AcadEntity.linetype
+	linetypegeneration = COM_Property("LinetypeGeneration", bool)
+	linetypescale = AcadEntity.linetypescale
+	lineweight = AcadEntity.lineweight
+	material = AcadEntity.material
+	normal = COM_Property("Normal", A3Vertex)
+	objectid = AcadEntity.objectid
+	objectname = AcadEntity.objectname
+	ownerid = AcadEntity.ownerid
+	plotstylename = AcadEntity.plotstylename
+	thickness = COM_Property("Thickness", float)
+	truecolor = AcadEntity.truecolor
+	type = COM_Property("Type", int) # acPolylineType enum
+	visible = AcadEntity.visible
+	
+	
+"""
+Object
+└─ AcadObject
+	└─ AcadEntity
+		└─ AcadPViewport
+"""	
+def AcadPViewport(POINTER(_dll.IAcadPViewport), AcadEntity):
+	def __new__(cls, Center: A3Vertex, Width: float, Height: float, source: (AcadApplication, AcadDocument, AcadBlock)=None):
+		kw = {
+			"Center": Center,
+			"Width": Width,
+			"Height": Height
+		}
+		_source = get_obj_block_source(source)
+		obj = _recast(_uncast(_source).AddPViewport(kw))
+		obj.connect_to_sink(_source.sink)
+		return obj
+	
+	# VBA-methods with recasting
+	arraypolar = AcadEntity.arraypolar
+	arrayrectangular = AcadEntity.arrayrectangular
+	copy = AcadEntity.copy
+	# Delete - without changes
+	# Display(Status<bool>) - without changes
+	getboundingbox = AcadEntity.getboundingbox
+	getextensiondictionary = AcadEntity.getextensiondictionary
+	def getgridspacing(self, Spacing: dict=dict()):
+		"""
+		getgridspacing(Index: int, Spacing: dict=dict())
+			Spacing = {"XSpacing":float, "YSpacing": float}
+			return XSpacing, YSpacing
+		"""
+		# Python does not support passing arguments ByRef, ByVal like VBA. Therefore, we use a dictionary to return the changed values from the input arguments. We also do normal returns Output-only arguments.
+		# TODO: NEED TEST
+		if isinstance(Spacing["XSpacing"], float):
+			Spacing["XSpacing"] = ctypes.c_double(Spacing["XSpacing"])
+		elif not isinstance(Spacing["XSpacing"], ctypes.c_double):
+			Spacing["XSpacing"] =  ctypes.c_double(0.0)
+		if isinstance(Spacing["YSpacing"], float):
+			Spacing["YSpacing"] = ctypes.c_double(Spacing["YSpacing"])
+		elif not isinstance(Spacing["YSpacing"], ctypes.c_double):
+			Spacing["YSpacing"] =  ctypes.c_double(0.0)
+		super().GetGridSpacing(ctypes.byref(Spacing["XSpacing"]), ctypes.byref(Spacing["YSpacing"]))
+		Spacing["XSpacing"] = float(Spacing["XSpacing"])
+		Spacing["YSpacing"] = float(Spacing["YSpacing"])
+		return Spacing["XSpacing"], Spacing["YSpacing"]
+	def getsnapspacing(self, Spacing: dict=dict()):
+		"""
+		getsnapspacing(Index: int, Spacing: dict=dict())
+			Spacing = {"XSpacing":float, "YSpacing": float}
+			return XSpacing, YSpacing
+		"""
+		# Python does not support passing arguments ByRef, ByVal like VBA. Therefore, we use a dictionary to return the changed values from the input arguments. We also do normal returns Output-only arguments.
+		# TODO: NEED TEST
+		if isinstance(Spacing["XSpacing"], float):
+			Spacing["XSpacing"] = ctypes.c_double(Spacing["XSpacing"])
+		elif not isinstance(Spacing["XSpacing"], ctypes.c_double):
+			Spacing["XSpacing"] =  ctypes.c_double(0.0)
+		if isinstance(Spacing["YSpacing"], float):
+			Spacing["YSpacing"] = ctypes.c_double(Spacing["YSpacing"])
+		elif not isinstance(Spacing["YSpacing"], ctypes.c_double):
+			Spacing["YSpacing"] =  ctypes.c_double(0.0)
+		super().GetSnapSpacing(ctypes.byref(Spacing["XSpacing"]), ctypes.byref(Spacing["YSpacing"]))
+		Spacing["XSpacing"] = float(Spacing["XSpacing"])
+		Spacing["YSpacing"] = float(Spacing["YSpacing"])
+		return Spacing["XSpacing"], Spacing["YSpacing"]
+	getxdata = AcadEntity.getxdata
+	# Highlight(<bool>) - without changes
+	intersectwith = AcadEntity.intersectwith
+	mirror = AcadEntity.mirror
+	mirror3d = AcadEntity.mirror3d
+	move = AcadEntity.move
+	rotate = AcadEntity.rotate
+	rotate3d = AcadEntity.rotate3d
+	scaleentity = AcadEntity.scaleentity
+	# SetGridSpacing(XSpacing<float>, YSpacing<float>) - without changes
+	# SetSnapSpacing(XSpacing<float>, YSpacing<float>) - without changes
+	setxdata = AcadEntity.setxdata
+	# SyncModelView - without changes
+	transformby = AcadEntity.transformby
+	# Update - without changes
+	
+	# VBA-properties with recasting
+	application = AcadEntity.application
+	arcsmoothness = COM_Property("ArcSmoothness", int, value_wrapper=int_as_arcsmoothness)
+	center = COM_Property("Center", A3Vertex)
+	clipped = COM_Property("Clipped", bool, None, True)
+	customscale = COM_Property("CustomScale", float)
+	direction = COM_Property("Direction", A3Vertex)
+	displaylocked = COM_Property("DisplayLocked", bool)
+	document = AcadEntity.document
+	entitytransparency = AcadEntity.entitytransparency
+	gridon = COM_Property("GridOn", bool)
+	handle = AcadEntity.handle
+	hasextensiondictionary = AcadEntity.hasextensiondictionary
+	hassheetview = COM_Property("HasSheetView", bool, None, True)
+	height = COM_Property("Height", float, value_wrapper=non_neg)
+	hyperlinks = AcadEntity.hyperlinks
+	labelblockid = COM_Property("LabelBlockId", int) # <Long_PTR>
+	layer = AcadEntity.layer
+	layerpropertyoverrides = COM_Property("LayerPropertyOverrides", bool, None, True)
+	lenslength = COM_Property("LensLength", float)
+	linetype = AcadEntity.linetype
+	linetypescale = AcadEntity.linetypescale
+	lineweight = AcadEntity.lineweight
+	material = AcadEntity.material
+	modelview = COM_PropertyRecast("ModelView", AcadView)
+	objectid = AcadEntity.objectid
+	objectname = AcadEntity.objectname
+	ownerid = AcadEntity.ownerid
+	plotstylename = AcadEntity.plotstylename
+	shadeplot = COM_Property("ShadePlot", int) # AcShadePlot enum
+	sheetview = COM_PropertyRecast("SheetView", AcadView)
+	snapbasepoint = COM_Property("SnapBasePoint", A2Vertex)
+	snapon = COM_Property("SnapOn", bool)
+	snaprotationangle = COM_Property("SnapRotationAngle", float, value_wrapper=angle_radian_scope)
+	standardscale = COM_Property("StandardScale", int) # acViewportScale enum
+	standardscale2 = COM_Property("StandardScale2", int)
+	target = COM_Property("Target", A3Vertex)
+	truecolor = AcadEntity.truecolor
+	twistangle = COM_Property("TwistAngle", float)
+	ucsiconatorigin = COM_Property("UCSIconAtOrigin", bool)
+	ucsiconon = COM_Property("UCSIconOn", bool)
+	ucsperviewport = COM_Property("UCSPerViewport", bool)
+	viewporton = COM_Property("ViewportOn", bool)
+	visible = AcadEntity.visible
+	visualstyle = COM_Property("VisualStyle", int)
+	width = COM_Property("Width", float)
+	
+	
+def int_as_arcsmoothness(value: int):
+	if value < 1: return 1
+	elif value > 20000: return 20000
+	return value
+	
+	
+"""
+Object
+└─ AcadObject
+	└─ AcadEntity
+		└─ AcadRasterImage
+"""	
+def AcadRasterImage(POINTER(_dll.IAcadRasterImage), AcadEntity):
+	def __new__(self, ImageFileName: str, InsertionPoint: A3Vertex = A3Vertex.Zero(), ScaleFactor: float = 1.0, RotationAngle: float = 0.0, source: (AcadApplication, AcadDocument, AcadBlock)=None):
+		kw = {
+			"ImageFileName":ImageFileName,
+			"InsertionPoint":InsertionPoint,
+			"ScaleFactor":ScaleFactor,
+			"RotationAngle":RotationAngle
+		}
+		_source = get_obj_block_source(source)
+		obj = _recast(_uncast(_source).AddRaster(kw))
+		obj.connect_to_sink(_source.sink)
+		return obj
+	
+	# VBA-methods with recasting
+	arraypolar = AcadEntity.arraypolar
+	arrayrectangular = AcadEntity.arrayrectangular
+	def clipboundary(self, PointsArray: A2Vertexes):
+		super().ClipBoundary(PointsArray.flatten())
+	copy = AcadEntity.copy
+	# Delete - without changes
+	getboundingbox = AcadEntity.getboundingbox
+	getextensiondictionary = AcadEntity.getextensiondictionary
+	getxdata = AcadEntity.getxdata
+	# Highlight<bool> - without changes
+	intersectwith = AcadEntity.intersectwith
+	mirror = AcadEntity.mirror
+	mirror3d = AcadEntity.mirror3d
+	move = AcadEntity.move
+	rotate = AcadEntity.rotate
+	rotate3d = AcadEntity.rotate3d
+	scaleentity = AcadEntity.scaleentity
+	setxdata = AcadEntity.setxdata
+	transformby = AcadEntity.transformby
+	# Update - without changes
+	
+	# VBA-properties with recasting
+	application = AcadEntity.application
+	brightness = COM_Property("Brightness", int, value_wrapper=value_between_0_100)
+	clippingenabled = COM_Property("ClippingEnabled", bool)
+	contrast = COM_Property("Contrast", int, value_wrapper=value_between_0_100)
+	document = AcadEntity.document
+	entitytransparency = AcadEntity.entitytransparency
+	fade = COM_Property("Fade", int, value_wrapper=value_between_0_100)
+	handle = AcadEntity.handle
+	hasextensiondictionary = AcadEntity.hasextensiondictionary
+	height = COM_Property("Height", float, None, True)
+	hyperlinks = AcadEntity.hyperlinks
+	imagefile = COM_Property("ImageFile", str)
+	imageheight = COM_Property("ImageHeight", float)
+	imagevisibility = COM_Property("ImageVisibility", bool)
+	imagewidth = COM_Property("ImageWidth", float)
+	layer = AcadEntity.layer
+	linetype = AcadEntity.linetype
+	linetypescale = AcadEntity.linetypescale
+	lineweight = AcadEntity.lineweight
+	material = AcadEntity.material
+	name = COM_Property("Name", str)
+	objectid = AcadEntity.objectid
+	objectname = AcadEntity.objectname
+	ownerid = AcadEntity.ownerid
+	plotstylename = AcadEntity.plotstylename
+	rotation = COM_Property("Rotation", float)
+	scalefactor = COM_Property("ScaleFactor", float, value_wrapper=non_neg)
+	showrotation = COM_Property("ShowRotation", bool)
+	transparency = COM_Property("Transparency", bool)
+	truecolor = AcadEntity.truecolor
+	visible = AcadEntity.visible
+	width = COM_Property("Width", float, None, True)
+	
+	
+def value_between_0_100(value: (int, float)):
+	if value < 0: return 0
+	elif value > 100: return 100
+	return value
+	
+	
+"""
+Object
+└─ AcadObject
+	└─ AcadEntity
+		└─ AcadRasterImage
+			└─ AcadWipeout
+"""	
+def AcadWipeout(POINTER(_dll.IAcadWipeout), AcadRasterImage):
+	def __new__(cls, *args, **kw):
+		raise TypeError("""You can't create {0}. Use Block.GetAttributes() for getting all stored attributes.""".format(cls))
+		
+	# VBA-methods with recasting
+	arraypolar = AcadRasterImage.arraypolar
+	arrayrectangular = AcadRasterImage.arrayrectangular
+	clipboundary = AcadRasterImage.clipboundary
+	copy = AcadRasterImage.copy
+	# Delete - without changes
+	getboundingbox = AcadRasterImage.getboundingbox
+	getextensiondictionary = AcadRasterImage.getextensiondictionary
+	getxdata = AcadRasterImage.getxdata
+	# Highlight<bool> - without changes
+	intersectwith = AcadRasterImage.intersectwith
+	mirror = AcadRasterImage.mirror
+	mirror3d = AcadRasterImage.mirror3d
+	move = AcadRasterImage.move
+	rotate = AcadRasterImage.rotate
+	rotate3d = AcadRasterImage.rotate3d
+	scaleentity = AcadRasterImage.scaleentity
+	setxdata = AcadRasterImage.setxdata
+	transformby = AcadRasterImage.transformby
+	# Update - without changes
+	
+	# VBA-properties with recasting
+	application = AcadRasterImage.application
+	brightness = AcadRasterImage.brightness
+	clippingenabled = AcadRasterImage.clippingenabled
+	contrast = AcadRasterImage.contrast
+	document = AcadRasterImage.document
+	entitytransparency = AcadRasterImage.entitytransparency
+	fade = AcadRasterImage.fade
+	handle = AcadRasterImage.handle
+	hasextensiondictionary = AcadRasterImage.hasextensiondictionary
+	height = AcadRasterImage.height
+	hyperlinks = AcadRasterImage.hyperlinks
+	imagefile = AcadRasterImage.imagefile
+	imageheight = AcadRasterImage.imageheight
+	imagevisibility = AcadRasterImage.imagevisibility
+	imagewidth = AcadRasterImage.imagewidth
+	layer = AcadRasterImage.layer
+	linetype = AcadRasterImage.linetype
+	linetypescale = AcadRasterImage.linetypescale
+	lineweight = AcadRasterImage.lineweight
+	material = AcadRasterImage.material
+	name = AcadRasterImage.name
+	objectid = AcadRasterImage.objectid
+	objectname = AcadRasterImage.objectname
+	ownerid = AcadRasterImage.ownerid
+	plotstylename = AcadRasterImage.plotstylename
+	rotation = AcadRasterImage.rotation
+	scalefactor = AcadRasterImage.scalefactor
+	showrotation = AcadRasterImage.showrotation
+	transparency = AcadRasterImage.transparency
+	truecolor = AcadRasterImage.truecolor
+	visible = AcadRasterImage.visible
+	width = AcadRasterImage.width
+
+
+"""
+Object
+└─ AcadObject
+	└─ AcadEntity
+		└─ AcadRay
+"""	
+def AcadRay(POINTER(_dll.IAcadRay), AcadEntity):
+	def __new__(self, Point1: A3Vertex, Point2: A3Vertex, source: (AcadApplication, AcadDocument, AcadBlock)=None):
+		kw = {
+			"Point1":Point1,
+			"Point2":Point2
+		}
+		_source = get_obj_block_source(source)
+		obj = _recast(_uncast(_source).AddRay(kw))
+		obj.connect_to_sink(_source.sink)
+		return obj
+
+	# VBA-methods with recasting
+	arraypolar = AcadEntity.arraypolar
+	arrayrectangular = AcadEntity.arrayrectangular
+	copy = AcadEntity.copy
+	# Delete - without changes
+	getboundingbox = AcadEntity.getboundingbox
+	getextensiondictionary = AcadEntity.getextensiondictionary
+	getxdata = AcadEntity.getxdata
+	# Highlight<bool> - without changes
+	intersectwith = AcadEntity.intersectwith
+	mirror = AcadEntity.mirror
+	mirror3d = AcadEntity.mirror3d
+	move = AcadEntity.move
+	rotate = AcadEntity.rotate
+	rotate3d = AcadEntity.rotate3d
+	scaleentity = AcadEntity.scaleentity
+	setxdata = AcadEntity.setxdata
+	transformby = AcadEntity.transformby
+	# Update - without changes
+	
+	# VBA-properties with recasting
+	application = AcadEntity.application
+	basepoint = COM_Property("BasePoint", A3Vertex)
+	directionvector = COM_Property("DirectionVector", A3Vertex)
+	document = AcadEntity.document
+	entitytransparency = AcadEntity.entitytransparency
+	handle = AcadEntity.handle
+	hasextensiondictionary = AcadEntity.hasextensiondictionary
+	hyperlinks = AcadEntity.hyperlinks
+	layer = AcadEntity.layer
+	linetype = AcadEntity.linetype
+	linetypescale = AcadEntity.linetypescale
+	lineweight = AcadEntity.lineweight
+	material = AcadEntity.material
+	objectid = AcadEntity.objectid
+	objectname = AcadEntity.objectname
+	ownerid = AcadEntity.ownerid
+	plotstylename = AcadEntity.plotstylename
+	secondpoint = COM_Property("SecondPoint", A3Vertex)
+	truecolor = AcadEntity.truecolor
+	visible = AcadEntity.visible
+	
+	
+"""
+Object
+└─ AcadObject
+	└─ AcadEntity
+		└─ AcadRegion
+"""	
+def AcadRegion(POINTER(_dll.IAcadRegion), AcadEntity):
+	def __new__(self, ObjectList: (list, tuple, AcadArc, AcadCircle, AcadEllipse, AcadLine, AcadLWPolyline, AcadSpline), source: (AcadApplication, AcadDocument, AcadBlock)=None):
+		if isinstance(ObjectList, (list, tuple)):
+			for obj in ObjectList:
+				if not isinstance(obj, (AcadArc, AcadCircle, AcadEllipse, AcadLine, AcadLWPolyline, AcadSpline)):
+					raise TypeError("[AcadRegion] ObjectList must be list, tupleor one entity of this types AcadArc, AcadCircle, AcadEllipse, AcadLine, AcadLWPolyline, AcadSpline")
+			kw = {
+			"ObjectList": ObjectList
+			}
+		elif isinstance(ObjectList, (AcadArc, AcadCircle, AcadEllipse, AcadLine, AcadLWPolyline, AcadSpline)):
+			kw = {
+			"ObjectList": [ObjectList]
+		}
+		else:
+			raise TypeError("[AcadRegion] ObjectList must be list, tupleor one entity of this types AcadArc, AcadCircle, AcadEllipse, AcadLine, AcadLWPolyline, AcadSpline")
+		
+		_source = get_obj_block_source(source)
+		obj = _recast(_uncast(_source).AddRegion(kw))
+		obj.connect_to_sink(_source.sink)
+		return obj
+	
+	# VBA-methods with recasting
+	arraypolar = AcadEntity.arraypolar
+	arrayrectangular = AcadEntity.arrayrectangular
+	copy = AcadEntity.copy
+	# Delete - without changes
+	def explode(self):
+		objs = super().Explode()
+		ret = []
+		for obj in objs:
+			ret.append(_recast(obj))
+			ret[-1].connect_to_sink(self.sink)
+		return ret
+	getboundingbox = AcadEntity.getboundingbox
+	getextensiondictionary = AcadEntity.getextensiondictionary
+	getxdata = AcadEntity.getxdata
+	# Highlight<bool> - without changes
+	intersectwith = AcadEntity.intersectwith
+	mirror = AcadEntity.mirror
+	mirror3d = AcadEntity.mirror3d
+	move = AcadEntity.move
+	rotate = AcadEntity.rotate
+	rotate3d = AcadEntity.rotate3d
+	scaleentity = AcadEntity.scaleentity
+	setxdata = AcadEntity.setxdata
+	transformby = AcadEntity.transformby
+	# Update - without changes
+	
+	# VBA-properties with recasting
+	application = AcadEntity.application
+	area = COM_Property("Area", float, None, True)
+	centroid = COM_Property("Centroid", A2Vertex, None, True)
+	document = AcadEntity.document
+	entitytransparency = AcadEntity.entitytransparency
+	handle = AcadEntity.handle
+	hasextensiondictionary = AcadEntity.hasextensiondictionary
+	hyperlinks = AcadEntity.hyperlinks
+	layer = AcadEntity.layer
+	linetype = AcadEntity.linetype
+	linetypescale = AcadEntity.linetypescale
+	lineweight = AcadEntity.lineweight
+	material = AcadEntity.material
+	momentofinertia = COM_Property("MomentOfInertia", A3Vertex, None, True)
+	normal = COM_Property("Normal", A3Vertex)
+	objectid = AcadEntity.objectid
+	objectname = AcadEntity.objectname
+	ownerid = AcadEntity.ownerid
+	perimeter = COM_Property("Perimeter", float, None, True)
+	plotstylename = AcadEntity.plotstylename
+	principaldirections = COM_Property("PrincipalDirections", A3Vertex, None, True)
+	principalmoments = COM_Property("PrincipalMoments", A3Vertex, None, True)
+	productofinertia = COM_Property("ProductOfInertia", A3Vertex, None, True)
+	radiiofgyration = COM_Property("RadiiOfGyration", A3Vertex, None, True)
+	truecolor = AcadEntity.truecolor
+	visible = AcadEntity.visible
+	
+	
+"""
+Object
+└─ AcadObject
+	└─ AcadEntity
+		└─ AcadSection
+"""	
+class AcadSection(POINTER(_dll.IAcadSection), AcadEntity):
+	def __new__(cls, FromPoint: A3Vertex, ToPoint: A3Vertex, planeVector: A3Vertex, source: (AcadApplication, AcadDocument, AcadBlock)=None):
+		kw = {
+			"FromPoint": FromPoint,
+			"ToPoint": ToPoint,
+			"planeVector": planeVector
+		}
+		_source = get_obj_block_source(source)
+		obj = _recast(_uncast(_source).AddSection(kw))
+		obj.connect_to_sink(_source.sink)
+		return obj
+	
+	# VBA-methods with recasting
+	def addvertex(self, Index: int, Point: A3Vertex):
+		super().AddVertex(Index, Point)
+	arraypolar = AcadEntity.arraypolar
+	arrayrectangular = AcadEntity.arrayrectangular
+	copy = AcadEntity.copy
+	def createjog(self, varPt: A3Vertex):
+		super().CreateJog(varPt)
+	# Delete - without changes
+	def generatesectiongeometry(self,
+		pEntity: AcadEntity, 
+		Outputs: dict=dict()):
+		"""
+		pIntersectionBoundaryObjs, #  Output-only; The intersection boundary objects. ToDo: FIX THIS
+		pIntersectionFillObjs, #  Output-only; The objects representing intersection fill annotation geometry. ToDo: FIX THIS
+		pBackgroudnObjs, #  Output-only; The background geometry objects. ToDo: FIX THIS
+		pForegroudObjs, #  Output-only; The foreground geometry objects. ToDo: FIX THIS
+		pCurveTangencyObjs #  Output-only; The curve tangency geometry objects. ToDo: FIX THIS
+		"""
+		# Python does not support passing arguments ByRef, ByVal like VBA. Therefore, we use a dictionary to return the changed values from the input arguments. We also do normal returns Output-only arguments.
+		# TODO: NEED TEST
+		Outputs["pIntersectionBoundaryObjs"] = Outputs["pIntersectionBoundaryObjs"] or 0 # TODO: NEED TEST
+		Outputs["pIntersectionFillObjs"] = Outputs["pIntersectionFillObjs"] or 0 # TODO: NEED TEST
+		Outputs["pBackgroudnObjs"] = Outputs["pBackgroudnObjs"] or 0 # TODO: NEED TEST
+		Outputs["pForegroudObjs"] = Outputs["pForegroudObjs"] or 0 # TODO: NEED TEST
+		Outputs["pCurveTangencyObjs"] = Outputs["pCurveTangencyObjs"] or 0 # TODO: NEED TEST
+		super().GenerateSectionGeometry(pEntity, Outputs["pIntersectionBoundaryObjs"], Outputs["pIntersectionFillObjs"], Outputs["pBackgroudnObjs"], Outputs["pForegroudObjs"], Outputs["pCurveTangencyObjs"])
+		return Outputs["pIntersectionBoundaryObjs"], Outputs["pIntersectionFillObjs"], Outputs["pBackgroudnObjs"], Outputs["pForegroudObjs"], Outputs["pCurveTangencyObjs"]
+	getboundingbox = AcadEntity.getboundingbox
+	getextensiondictionary = AcadEntity.getextensiondictionary
+	getxdata = AcadEntity.getxdata
+	# Highlight<bool> - without changes
+	def HitTest(self,
+		varPtHit: A3Vertex,
+		pHit: bool=bool(),
+		pSegmentIndex: int=int(),
+		pPtOnSegment: A3Vertex=A3Vertex.Zero(),
+		pSubItem: int=int() # AcSectionSubItem enum
+		):
+		super().HitTest(varPtHit, pHit, pSegmentIndex, pPtOnSegment, pSubItem) # ToDo: NEED TEST
+		return pHit, pSegmentIndex, pPtOnSegment, pSubItem
+	
+	
+
+
+
+
 
 

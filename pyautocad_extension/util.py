@@ -129,10 +129,10 @@ def arr_check(var, t):
 def recast(com_obj_ptr, prefer_type=None):
 	if not isinstance(com_obj_ptr,	POINTER):
 		raise TypeError("Can't recast {0}".format(com_obj_ptr))
-	if prefer_type is not None:
+	elif prefer_type is not None:
 		com_obj_ptr.__class__ = prefer_type
-	if com_obj_ptr.ObjectName in com_parse_dict.keys():
-		com_obj_ptr.__class__ = com_parse_dict[key]
+	elif com_obj_ptr.ObjectName in com_parse_dict.keys():
+		com_obj_ptr.__class__ = com_parse_dict[com_obj_ptr.ObjectName]
 	return com_obj_ptr
 
 def uncast(py_obj, prefer_type=None):
@@ -151,7 +151,7 @@ def get_obj_block_source(source=None, new_doc_if_need: bool=True):
 		source = source.ActiveDocument if source.Documents.Count > 0 else source.Documents.Add()
 	if isinstance(source, AcadDocument):
 		source = source.ModelSpace
-	if isinstance(source, AcadBlock):
+	if not isinstance(source, AcadBlock):
 		raise ValueError("[get_obj_block_source] 'source' argument must be AcadApplication, AcadDocument oe any type of AcadBlock (AcadBlock, AcadModelSpace, AcadPaperSpace)")
 	return source
 
