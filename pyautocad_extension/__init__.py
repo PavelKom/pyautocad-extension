@@ -34,7 +34,7 @@ def get_win_os_disk() -> str:
 
 
 # AutoCAD
-from .api import *
+from api import * #TODO: api -> .api
 '''
 from .application import *
 from .document import *
@@ -42,5 +42,4 @@ from .enum import *
 from .geometry import *
 from .blocks import *
 '''
-# VBA
-from .vba import *
+

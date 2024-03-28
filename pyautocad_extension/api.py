@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from comtypes.client import GetModule, CreateObject, GetActiveObject
 from pathlib import Path
-from . import get_win_os_disk
+from __init__ import get_win_os_disk #TODO: __init__ -> .
 
 
 class AcadDLL:
