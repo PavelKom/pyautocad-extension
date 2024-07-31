@@ -1,0 +1,14 @@
+Item
+	Gets the member object at a given index in a collection, group, or selection set
+_get__NewEnum
+	None
+_get_Count
+	Gets the number of items in the collection, dictionary, group, or selection set
+_get_Application
+	Gets the Application object
+Add
+	Creates a member object and adds it to the appropriate collection
+Open
+	Opens an existing drawing file (DWG) and makes it the active document
+Close
+	Closes the specified drawing, or all open drawings

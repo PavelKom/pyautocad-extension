@@ -1,16 +1,20 @@
-from comtypes import POINTER
+from comtypes import POINTER, BSTR
 from comtypes.automation import IDispatch
 from comtypes.client import GetEvents, ShowEvents
 from comtypes.client import GetModule, CreateObject, GetActiveObject
+from pythoncom import Nothing, Empty
 
 import ctypes
 
+from enums import *
+from stubs import *
 from event_sink import _AcadEventDumper
 from api import acad_dll #TODO: api -> .api
+from doc import AcadDocument, AcadDocuments #TODO: doc -> .doc
+from utils import _ez_ptr, CastManager
 _dll = acad_dll.dll
 
-
-class AcadApplication(POINTER(_dll.IAcadApplication)):
+class AcadApplication(POINTER(_dll.IAcadApplication), _ez_ptr):
     def __new__(cls, create_if_not_exists=True, always_new=False, visible=True, sink=None):
         if always_new:
             # NOT DYNAMIC. Because dynamic cast used IDispatch, and Events not working
@@ -25,139 +29,193 @@ class AcadApplication(POINTER(_dll.IAcadApplication)):
                     app = CreateObject(_dll.AcadApplication)
         app.Visible = visible
         app.__class__ = AcadApplication
-        app.sink = sink
-        if app.sink is not None:
-            app.events = GetEvents(app, sink, _dll._DAcadApplicationEvents)
+        #app.sink = sink
+        #if app.sink is not None:
+        #    app.events = GetEvents(app, sink, _dll._DAcadApplicationEvents)
         return app
 
-    #VBA-parsed method
+    #VBA-parsed method TODO: add recast
     def eval(self, Expression: str):
         """Evaluates an expression in VBA"""
-        self._IAcadApplication__com_Eval(Expression)
+        self.com_parent.Eval(Expression)
     def getacadstate(self):
         """Retrieves an AcadState object."""
-        self._IAcadApplication__com_GetAcadState()
+        return CastManager.cast(self.com_parent.GetAcadState())
     def getinterfaceobject(self, ProgID: str):
         """Accepts a program ID and attempts to load it into AutoCAD as an in-process server"""
-        self._IAcadApplication__com_GetInterfaceObject(ProgID)
+        return CastManager.cast(self.com_parent.GetInterfaceObject(ProgID))
     def listarx(self):
         """Gets the currently loaded AutoCAD ARX applications"""
-        return self._IAcadApplication__com_ListArx()
+        return CastManager.cast(self.com_parent.ListArx())
     def loadarx(self, Name: str):
         """Loads the specified AutoCAD ARX applicationUnloadArx"""
-        self._IAcadApplication__com_LoadArx(Name)
+        self.com_parent.LoadArx(Name)
     def loaddvb(self, Name: str):
         """Loads the specified AutoCAD VBA project file"""
-        self._IAcadApplication__com_LoadDVB(Name)
+        self.com_parent.LoadDVB(Name)
     def quit(self):
         """Closes the drawing file and exits the AutoCAD application"""
-        self._IAcadApplication__com_Quit()
+        self.com_parent.Quit()
     def runmacro(self, MacroPath: str):
         """Runs a VBA macro from the Application object"""
-        self._IAcadApplication__com_RunMacro(MacroPath)
+        self.com_parent.RunMacro(MacroPath)
     def unloadarx(self, Name: str):
         """Unloads the specified AutoCAD ARX application"""
-        self._IAcadApplication__com_UnloadArx(Name)
+        self.com_parent.UnloadArx(Name)
     def unloaddvb(self, Name: str):
         """Unloads the specified AutoCAD VBA project file"""
-        self._IAcadApplication__com_UnloadDVB(Name)
+        self.com_parent.UnloadDVB(Name)
     def Update(self):
         """Updates the object to the drawing screen"""
-        self._IAcadApplication__com_Update()
+        self.com_parent.Update()
     #def _IAcadApplication__com_Zoom
     def ZoomAll(self):
         """Zooms the current viewport to display the entire drawing"""
-        self._IAcadApplication__com_ZoomAll()
-    def ZoomCenter(self, Center, Magnify: float): #Center as A3Point
+        self.com_parent.ZoomAll()
+    def ZoomCenter(self, Center: A3Point, Magnify: float):
         """Zooms the current viewport to a specified center point and magnification"""
-        self._IAcadApplication__com_ZoomCenter(Center, Magnify)
+        self.com_parent.ZoomCenter(Center, Magnify)
     def ZoomExtents(self):
         """Zooms the current viewport to the drawing extents"""
-        self._IAcadApplication__com_ZoomExtents()
+        self.com_parent.ZoomExtents()
     def ZoomPickWindow(self):
         """Zooms the current viewport to a window defined by points picked on the screen"""
-        self._IAcadApplication__com_ZoomPickWindow()
+        self.com_parent.ZoomPickWindow()
     def ZoomPrevious(self):
         """Zooms the current viewport to its previous extents"""
-        self._IAcadApplication__com_ZoomPrevious()
-    def ZoomScaled(self, scale: float, ScaleType: int): #ScaleType As AcZoomScaleType
+        self.com_parent.ZoomPrevious()
+    def ZoomScaled(self, scale: float, ScaleType: AcZoomScaleType):
         """Zooms the current viewport to given scale factor"""
-        self._IAcadApplication__com_ZoomScaled(scale, ScaleType)
+        self.com_parent.ZoomScaled(scale, ScaleType.value)
     def ZoomWindow(self, LowerLeft, UpperRight):#LowerLeft, UpperRight as A3Point
         """Zooms the current viewport to the area specified by two opposite corners of a rectangle"""
-        self._IAcadApplication__com_ZoomWindow(LowerLeft, UpperRight)
+        self.com_parent.ZoomWindow(LowerLeft, UpperRight)
 
-    # VBA-properties TODO: rewrite this?
-    activedocument = property(
-        fget=self._IAcadApplication__com__get_ActiveDocument,
-        fset=self._IAcadApplication__com__set_ActiveDocument,
-        doc="Specifies the active document (drawing file)")
-    application = property(
-        fget=self._IAcadApplication__com__get_Application,
-        doc="Gets the Application object")
-    caption = property(
-        fget=self._IAcadApplication__com__get_Caption,
-        doc="Gets the text that the user sees displayed for the application or a menu item")
-    documents = property(
-        fget=self._IAcadApplication__com__get_Documents,
-        doc="Returns the documents collection.")
-    fullname = property(
-        fget=self._IAcadApplication__com__get_FullName,
-        doc="Gets the name of the application or document, including the path")
-    height = property(
-        fget=self._IAcadApplication__com__get_Height,
-        fset=self._IAcadApplication__com__set_Height,
-        doc="Height of the attribute, shape, text, or view toolbar or the main application window")
-    HWND = property(
-        fget=self._IAcadApplication__com__get_HWND,
-        doc="Gets the window handle of the application window frame")
-    localeid = property(
-        fget=self._IAcadApplication__com__get_LocaleId,
-        doc="Gets the locale ID of the current AutoCAD session")
-    menubar = property(
-        fget=self._IAcadApplication__com__get_MenuBar,
-        doc="Gets the MenuBar object for the session")
-    menugroups = property(
-        fget=self._IAcadApplication__com__get_MenuGroups,
-        doc="Gets the MenuGroups collection for the session")
-    name = property(
-        fget=self._IAcadApplication__com__get_Name,
-        doc="Specifies the name of the object")
-    path = property(
-        fget=self._IAcadApplication__com__get_Path,
-        doc="Gets the path of the document, application, or external reference")
-    preferences = property(
-        fget=self._IAcadApplication__com__get_Preferences,
-        doc="Gets the Preferences object")
-    statusid = property(
-        fget=self._IAcadApplication__com__get_StatusId,
-        doc="Gets the current active status of the viewport")
-    vbe = property(
-        fget=self._IAcadApplication__com__get_VBE,
-        doc="Gets the VBAIDE extensibility object")
-    version = property(
-        fget=self._IAcadApplication__com__get_Version,
-        doc="Gets the version of the AutoCAD application you are using")
-    visible = property(
-        fget=self._IAcadApplication__com__get_Visible,
-        fset=self._IAcadApplication__com__set_Visible,
-        doc="Specifies the visibility of an object or the application")
-    width = property(
-        fget=self._IAcadApplication__com__get_Width,
-        fset=self._IAcadApplication__com__set_Width,
-        doc="Specifies the width of the text boundary, view, image, toolbar, or main application window")
-    windowleft = property(
-        fget=self._IAcadApplication__com__get_WindowLeft,
-        fset=self._IAcadApplication__com__set_WindowLeft,
-        doc="Specifies the left edge of the application window")
-    windowstate = property(
-        fget=self._IAcadApplication__com__get_WindowState,
-        fset=self._IAcadApplication__com__set_WindowState,
-        doc="Specifies the state of the application or document window")
-    windowtop = property(
-        fget=self._IAcadApplication__com__get_WindowTop,
-        fset=self._IAcadApplication__com__set_WindowTop,
-        doc="Specifies the top edge of the application window")
+    # VBA-properties TODO: add recast
+    @property
+    def activedocument(self):
+        "Specifies the active document (drawing file)"
+        return CastManager.cast(self.com_parent.ActiveDocument)
+    @activedocument.setter
+    def _(self, value: AcadDocument):
+        self.com_parent.ActiveDocument = value
+    @property
+    def application(self):
+        "Gets the Application object"
+        return CastManager.cast(self.com_parent.Application)
+    
+    @property
+    def caption(self):
+        "Gets the text that the user sees displayed for the application or a menu item"
+        return self.com_parent.Caption
+
+    @property
+    def documents(self):
+        "Returns the documents collection."
+        return CastManager.cast(self.com_parent.Documents)
+
+    @property
+    def fullname(self):
+        "Gets the name of the application or document, including the path"
+        return self.com_parent.FullName
+    
+    @property
+    def height(self):
+        "Height of the attribute, shape, text, or view toolbar or the main application window"
+        return self.com_parent.Height
+    @height.setter
+    def _(self, value: int):
+        self.com_parent.Height = value
+
+    @property
+    def hwnd(self):
+        "Gets the window handle of the application window frame"
+        return self.com_parent.HWND
+
+    @property
+    def localeid(self):
+        "Gets the locale ID of the current AutoCAD session"
+        return self.com_parent.LocaleId
+    
+    @property
+    def menubar(self):
+        "Gets the MenuBar object for the session"
+        return CastManager.cast(self.com_parent.MenuBar)
+    
+    @property
+    def menugroups(self):
+        "Gets the MenuGroups collection for the session"
+        return CastManager.cast(self.com_parent.MenuGroups)
+    
+    @property
+    def name(self):
+        "Specifies the name of the object"
+        return self.com_parent.Name
+    
+    @property
+    def path(self):
+        "Gets the path of the document, application, or external reference"
+        return self.com_parent.Path
+    
+    @property
+    def preferences(self):
+        "Gets the Preferences object"
+        return CastManager.cast(self.com_parent.Preferences)
+    
+    @property
+    def statusid(self, VportObj):
+        "Gets the current active status of the viewport"
+        return self.com_parent.StatusId[VportObj]
+    
+    @property
+    def vbe(self):
+        "Gets the VBAIDE extensibility object"
+        return CastManager.cast(self.com_parent.VBE)
+    
+    @property
+    def version(self):
+        "Gets the version of the AutoCAD application you are using"
+        return self.com_parent.Version
+    
+    @property
+    def visible(self):
+        "Specifies the visibility of an object or the application"
+        return self.com_parent.Visible
+    @visible.setter
+    def _(self, value: bool):
+        self.com_parent.Visible = value
+    
+    @property
+    def width(self):
+        "Specifies the width of the text boundary, view, image, toolbar, or main application window"
+        return self.com_parent.Width
+    @width.setter
+    def _(self, value: int):
+        self.com_parent.Width = value
+    
+    @property
+    def windowleft(self):
+        "Specifies the left edge of the application window"
+        return self.com_parent.WindowLeft
+    @windowleft.setter
+    def _(self, value: int):
+        self.com_parent.WindowLeft = value
+    
+    @property
+    def windowstate(self):
+        "Specifies the state of the application or document window"
+        return self.com_parent.WindowState
+    @windowstate.setter
+    def _(self, value: AcWindowState):
+        self.com_parent.WindowState = value.value
+    
+    @property
+    def windowtop(self):
+        "Specifies the top edge of the application window"
+        return self.com_parent.WindowTop
+    @windowtop.setter
+    def _(self, value: int):
+        self.com_parent.WindowTop = value
 
 
 class AcadApplicationEvents(_AcadEventDumper):
@@ -211,6 +269,102 @@ class AcadApplicationEvents(_AcadEventDumper):
     def _DAcadApplicationEvents_WindowMovedOrResized(self, HWNDFrame, bMoved: bool):
         pass
 
-
-
 __all__ = ("AcadApplication", "AcadApplicationEvents", )
+
+# for debugging
+if __name__ == "__main__":
+    import pyperclip
+    class Method(dict):
+        def __str__(self):
+            return f"\tdef {self['name'].lower()}(self, ___):\n\t\t'{self['desc']}'\n\t\tself.com_parent.{self['name']}(___)\n"
+        __repr__ = __str__
+    class Prop(dict):
+        def __str__(self):
+            data = ""
+            if 'getter' in self.keys():
+                data += f"\t@property\n\tdef {self['name'].lower()}(self):\n\t\t'{self['desc']}'\n\t\treturn self.com_parent.{self['name']}"
+            if 'setter' in self.keys():
+                if 'getter' in self.keys():
+                    data += f"\n\t@{self['name'].lower()}.setter\n\tdef _(self, value):\n\t\tself.com_parent.{self['name']} = value"
+                else:
+                    data += f"\t@{self['name'].lower()}.setter\n\tdef _(self, value):\n\t\t'{self['desc']}'\n\t\tself.com_parent.{self['name']} = value"
+            data += "\n"
+            return data
+        __repr__ = __str__
+    def write(name):
+        pyperclip.copy(name) #Копирует в буфер обмена информацию
+        pyperclip.paste()
+                
+    
+    def get_method_type(o):
+        for i, obj2 in enumerate(obj):
+            if i == 1:
+                if str(obj2).startswith("_get_"):
+                    return 1
+                if str(obj2).startswith("_set_"):
+                    return 2
+                return 0
+    def is_method(o):
+        return get_method_type(o) == 0
+    def is_get(o):
+        return get_method_type(o) == 1
+    def is_set(o):
+        return get_method_type(o) == 2
+    def get_name(o):
+        for i, obj2 in enumerate(obj):
+            if i == 1:
+                return str(obj2).replace("_get_", "").replace("_set_", "")
+    def get_desc(o):
+        for i, obj2 in enumerate(obj):
+            if i == 5:
+                return str(obj2)
+    
+    
+    data = ""
+    objs = {}
+    for obj in _dll.IAcadPolyfaceMesh._methods_:
+        if get_name(obj) not in objs.keys():
+            if is_method(obj):
+                d = Method()
+                d['name'] = get_name(obj)
+                d['desc'] = get_desc(obj)
+                objs[get_name(obj)] = d
+            elif is_get(obj):
+                d = Prop()
+                d['getter'] = True
+                d['name'] = get_name(obj)
+                d['desc'] = get_desc(obj)
+                objs[get_name(obj)] = d
+            elif is_set(obj):
+                d = Prop()
+                d['setter'] = True
+                d['name'] = get_name(obj)
+                d['desc'] = get_desc(obj)
+                objs[get_name(obj)] = d
+        else:
+            if is_get(obj):
+                objs[get_name(obj)]['getter'] = True
+            elif is_set(obj):
+                objs[get_name(obj)]['setter'] = True
+
+    props = []
+    methods = []
+    for k, v in objs.items():
+        if type(v) == Method:
+            methods.append(k)
+        else:
+            props.append(k)
+    methods.sort()
+    props.sort()
+    #print(m_keys, p_keys)
+    data = ""
+    for k in methods:
+        #print(objs[k])
+        data += str(objs[k]) + "\n"
+    for k in props:
+        #print(objs[k])
+        data += str(objs[k]) + "\n"
+    write(data)
+
+    
+    

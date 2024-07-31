@@ -1,56 +1,56 @@
 Used for visualisation inherits Autocad classes
 ─ │ ┌ ┐ └ ┘ ├ ┤ ┬ ┴ ┼ ═ ║ ╒ ╓ ╔ ╕ ╖ ╗ ╘ ╙ ╚ ╛ ╜ ╝ ╞ ╟ ╠ ╡ ╢ ╣ ╤ ╥ ╦ ╧ ╨ ╩ ╪ ╫ ╬
-class, recast, hndl, no_hndl, iter, can_create, can_not_create, event, no_event, __str__
+class, ptr, hndl, no_hndl, iter, can_create, can_not_create, event, no_event, __str__
 Object
 	├─ AcadState | 
 	├─ AcadAcCmColor | 
-	├─ AcadApplication | 
-	├─ AcadObject | class , can recast???, hndl, can_not_create, event, __str__
-	│	├─ AcadEntity | class, can recast???, hndl, can_not_create, event, __str__
-	│	│	├─ Acad3DFace | class, hndl, iter, can_create, event
-	│	│	├─ Acad3DPolyline | class, hndl, iter, can_create, event
-	│	│	├─ Acad3DSolid | class, hndl, can_create, event
-	│	│	├─ AcadArc | class, hndl, can_create, event
-	│	│	├─ AcadAttribute | class, hndl, can_create, event
-	│	│	├─ AcadAttributeReference | class, hndl, can_not_create, event
-	│	│	├─ AcadBlockReference | class, hndl, can_create, event
-	│	│	│	├─ AcadExternalReference | class, hndl, can_create, event
-	│	│	│	│	├─ AcadComparedReference | class, hndl, can_not_create, event
-	│	│	│	├─ AcadMInsertBlock | class, hndl, can_create, event
-	│	│	├─ AcadCircle | class, hndl, can_create, event
-	│	│	├─ AcadDimension | class, hndl, can_not_create, event
-	│	│	│	├─ AcadDim3PointAngular | class, hndl, can_create, event
-	│	│	│	├─ AcadDimAligned | class, hndl, can_create, event
-	│	│	│	├─ AcadDimAngular | class, hndl, can_create, event
-	│	│	│	├─ AcadDimArcLength | class, hndl, can_create, event
-	│	│	│	├─ AcadDimDiametric | class, hndl, can_create, event
-	│	│	│	├─ AcadDimOrdinate | class, hndl, can_create, event
-	│	│	│	├─ AcadDimRadial | class, hndl, can_create, event
-	│	│	│	├─ AcadDimRadialLarge | class, hndl, can_create, event
-	│	│	│	├─ AcadDimRotated | class, hndl, can_create, event
-	│	│	├─ AcadEllipse | class, hndl, can_create, event
-	│	│	├─ AcadGeoPositionMarker | class, hndl, can_not_create, event
-	│	│	├─ AcadHatch | class, hndl, can_create, event
-	│	│	├─ AcadHelix | class, hndl, event
-	│	│	├─ AcadLeader | class, hndl, can_create, event
-	│	│	├─ AcadLWPolyline | class, hndl, can_create, event
-	│	│	├─ AcadLine | class, hndl, can_create, event
-	│	│	├─ AcadLoftedSurface | class, hndl, can_not_create, event
-	│	│	├─ AcadMLeader | class, hndl, can_create, event
-	│	│	├─ AcadMLine | class, hndl, can_create, event
-	│	│	├─ AcadMtext | class, hndl, can_create, event
-	│	│	├─ AcadOle | class, hndl, can_create, event
-	│	│	├─ AcadPoint | class, hndl, can_create, event
-	│	│	├─ AcadPointCloud | class, hndl, can_not_create, event
-	│	│	├─ AcadPointCloudEx | class, hndl, can_not_create, event
-	│	│	├─ AcadPolyfaceMesh | class, hndl, can_create, event
-	│	│	├─ AcadPolygonMesh | class, hndl, ???can_not_create???, event
-	│	│	├─ AcadPolyline | class, hndl, can_create, event
-	│	│	├─ AcadPViewport | class, hndl, can_create, event
-	│	│	├─ AcadRasterImage | class, hndl, can_create, event
-	│	│	│	├─ AcadWipeout | class, hndl, can_not_create, event
-	│	│	├─ AcadRay | class, hndl, can_create, event
-	│	│	├─ AcadRegion | class, hndl, can_create, event
+	├─ AcadApplication | class, can_create, no_hndl
+	├─ AcadObject | 
+	│	├─ AcadEntity | 
+	│	│	├─ Acad3DFace | 
+	│	│	├─ Acad3DPolyline | 
+	│	│	├─ Acad3DSolid | 
+	│	│	├─ AcadArc | 
+	│	│	├─ AcadAttribute | 
+	│	│	├─ AcadAttributeReference | 
+	│	│	├─ AcadBlockReference | 
+	│	│	│	├─ AcadExternalReference | 
+	│	│	│	│	├─ AcadComparedReference | NOT SUPPORTED
+	│	│	│	├─ AcadMInsertBlock | 
+	│	│	├─ AcadCircle | 
+	│	│	├─ AcadDimension | 
+	│	│	│	├─ AcadDim3PointAngular | 
+	│	│	│	├─ AcadDimAligned | 
+	│	│	│	├─ AcadDimAngular | 
+	│	│	│	├─ AcadDimArcLength | 
+	│	│	│	├─ AcadDimDiametric | 
+	│	│	│	├─ AcadDimOrdinate | 
+	│	│	│	├─ AcadDimRadial | 
+	│	│	│	├─ AcadDimRadialLarge | 
+	│	│	│	├─ AcadDimRotated | 
+	│	│	├─ AcadEllipse | 
+	│	│	├─ AcadGeoPositionMarker | 
+	│	│	├─ AcadHatch | 
+	│	│	├─ AcadHelix | 
+	│	│	├─ AcadLeader | 
+	│	│	├─ AcadLWPolyline | 
+	│	│	├─ AcadLine | 
+	│	│	├─ AcadLoftedSurface | 
+	│	│	├─ AcadMLeader | 
+	│	│	├─ AcadMLine | 
+	│	│	├─ AcadMtext | 
+	│	│	├─ AcadOle | 
+	│	│	├─ AcadPoint | 
+	│	│	├─ AcadPointCloud | 
+	│	│	├─ AcadPointCloudEx | 
+	│	│	├─ AcadPolyfaceMesh | 
+	│	│	├─ AcadPolygonMesh | 
+	│	│	├─ AcadPolyline | 
+	│	│	├─ AcadPViewport | 
+	│	│	├─ AcadRasterImage | 
+	│	│	│	├─ AcadWipeout | 
+	│	│	├─ AcadRay | 
+	│	│	├─ AcadRegion | 
 	│	│	├─ AcadSection | 
 	│	│	├─ AcadShape | 
 	│	│	├─ AcadSolid | 
@@ -76,7 +76,7 @@ Object
 	│	│	├─ AcadPaperSpace | 
 	│	├─ AcadBlocks | 
 	│	├─ AcadDictionaries | 
-	│	├─ AcadDictionary | class, iter, hndl, can_create, event
+	│	├─ AcadDictionary | 
 	│	├─ AcadDimStyle | 
 	│	├─ AcadDimStyles | 
 	│	├─ AcadGroup | 
@@ -127,7 +127,7 @@ Object
 	│	├─ AcadSubEntSolidFace | 
 	│	├─ AcadSubEntSolidNode | 
 	│	├─ AcadSubEntSolidVertex | 
-	├─ AcadIDPair |  
+	├─ AcadIDPair | 
 	├─ AcadObjectEvents | 
 	├─ AcadPlot | 
 	├─ AcadPopupMenu | 
