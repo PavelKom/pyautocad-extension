@@ -4,7 +4,7 @@ import  comtypes.gen.AutoCAD as acadlib
 import os
 import re
 dir_path = os.path.dirname(os.path.realpath(__file__))
-dir_path += r"\raw_classes.py"
+dir_path += r"\raw_classes2.py"
 
 '''
 for n in dir(acadlib):
@@ -454,28 +454,29 @@ for ck in ckk:
 	is_ent = False
 	buf2 = "\n"
 	buf2 += "class {}(POINTER(_dll.{}), _ez_ptr):".format(ck.replace("IAcad","Acad"), ck)
-	for i, mro in enumerate(inspect.getmro(getattr(acadlib, ck))):
-		if mro.__name__ == "IAcadEntity" and ck != "IAcadEntity":
-			buf2 += "# ENTITY"
-			is_ent = True
-	buf2 += "\n\"TODO: ADD DOC\"\n"
-	for i, mro in enumerate(inspect.getmro(getattr(acadlib, ck))):
-		buf2 += "#{}{}\n".format(i*"\t", mro.__name__)
-	buf2 += "# Prototype for {} VBA-class wrapped as {} python-class\n".format(ck, ck.replace("IAcad","Acad"))
-	buf2 += """# TODO list:
+	buf2 += "\npass\n"
+	#for i, mro in enumerate(inspect.getmro(getattr(acadlib, ck))):
+	#	if mro.__name__ == "IAcadEntity" and ck != "IAcadEntity":
+	#		buf2 += "# ENTITY"
+	#		is_ent = True
+	#buf2 += "\n\"TODO: ADD DOC\"\n"
+	#for i, mro in enumerate(inspect.getmro(getattr(acadlib, ck))):
+	#	buf2 += "#{}{}\n".format(i*"\t", mro.__name__)
+	#buf2 += "# Prototype for {} VBA-class wrapped as {} python-class\n".format(ck, ck.replace("IAcad","Acad"))
+	'''buf2 += """# TODO list:
 	# 1. COM-types to python-types vars and props
 	# 2. ByRef inputs/outputs
 	# 3. Inherits
 	# 4. __new__
 	# 5. Aliases
 	# 6. Overloads
-	# 9999. Tests\n"""
-	buf2 += "# Interfaced methods (remove after checking):\n"
-	for m in dir(getattr(acadlib, ck)):
-		if m.startswith("_IAcad"):
-			buf2 += "#\t{}\n".format(m)
-	for pm in ppmm[ck]:
-		buf2 += "{}\n".format(pm)
+	# 9999. Tests\n""" '''
+	#buf2 += "# Interfaced methods (remove after checking):\n"
+	#for m in dir(getattr(acadlib, ck)):
+	#	if m.startswith("_IAcad"):
+	#		buf2 += "#\t{}\n".format(m)
+	#for pm in ppmm[ck]:
+	#	buf2 += "{}\n".format(pm)
 	#c = getattr(acadlib, ck)
 	#print(c, "\n\t", "\n\t".join(dir(c)))
 	#buf += buf2

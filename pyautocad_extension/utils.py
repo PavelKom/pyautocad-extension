@@ -10,6 +10,7 @@ import array
 import numpy as np
 
 from pyautocad import APoint
+from pyautocad.compat import IS_PY3
 
 pattern1 = "_.*_"
 
@@ -90,7 +91,18 @@ class SetterProperty(object):
     def __set__(self, obj, value):
         return self.func(obj, value)
 
+
 class A3Vertex(APoint):
+    def __new__(cls, x_or_seq=0, y=0.0, z=0.0): # Allow trimmed lists for X
+        if isinstance(x_or_seq, (array.array, list, tuple)):
+            arr = []
+            for i in range(1,4):
+                if i <= len(x_or_seq):
+                    arr.append(x_or_seq[i-1])
+                else:
+                    arr.append(0)
+            return super(A3Vertex, cls).__new__(cls, arr)
+        return super(A3Vertex, cls).__new__(cls, (x_or_seq, y, z))
     X = APoint.x
     Y = APoint.y
     Z = APoint.z
@@ -105,13 +117,203 @@ class A3Vertex(APoint):
         return A3Vertex(abs(self.x), abs(self.y), abs(self.z))
     
 class A2Vertex(array.array):
-    pass # ToDo: For 2d points, for LWPolylines
+    # Same as A3Vertex but for 2D
+    def __new__(cls, x_or_seq=0, y=0.0): # Allow trimmed lists for X
+        if isinstance(x_or_seq, (array.array, list, tuple)):
+            arr = []
+            for i in range(1,3):
+                if i <= len(x_or_seq):
+                    arr.append(x_or_seq[i-1])
+                else:
+                    arr.append(0)
+            return super(A2Vertex, cls).__new__(cls, 'd', arr)
+        return super(A2Vertex, cls).__new__(cls, 'd', (x_or_seq, y))
+        
+    @property
+    def x(self):
+        """ x coordinate of 2D point"""
+        return self[0]
+    @x.setter
+    def x(self, value):
+        self[0] = value
+    X = x
 
-class A3Vertexes(array.array):
-    pass # ToDo: For list<A3Vertex> uses
+    @property
+    def y(self):
+        """ y coordinate of 2D point"""
+        return self[1]
+    @y.setter
+    def y(self, value):
+        self[1] = value
+    Y = y
     
-class A2Vertexes(array.array):
-    pass # ToDo: For list<A2Vertex> uses
+    def distance_to(self, other):
+        """ Returns distance to `other` point
+
+        :param other: :class:`A2Vertex` instance or any sequence of 3 coordinates
+        """
+        return distance_2d(self, other)
+    
+    #Copy from APoint
+    def __add__(self, other):
+        return self.__left_op(self, other, operator.add)
+
+    def __sub__(self, other):
+        return self.__left_op(self, other, operator.sub)
+
+    def __mul__(self, other):
+        return self.__left_op(self, other, operator.mul)
+
+    if IS_PY3:
+        def __div__(self, other):
+            return self.__left_op(self, other, operator.truediv)
+    else:
+        def __div__(self, other):
+            return self.__left_op(self, other, operator.div)
+
+    __radd__ = __add__
+    __rsub__ = __sub__
+    __rmul__ = __mul__
+    __rdiv__ = __div__
+    __floordiv__ = __div__
+    __rfloordiv__ = __div__
+    __truediv__ = __div__
+    _r_truediv__ = __div__
+
+    def __neg__(self):
+        return self.__left_op(self, -1, operator.mul)
+
+    def __left_op(self, p1, p2, op):
+        if isinstance(p2, (float, int)):
+            return A2Vertex(op(p1[0], p2), op(p1[1], p2))
+        return A2Vertex(op(p1[0], p2[0]), op(p1[1], p2[1]))
+
+    def __iadd__(self, p2):
+        return self.__iop(p2, operator.add)
+
+    def __isub__(self, p2):
+        return self.__iop(p2, operator.sub)
+
+    def __imul__(self, p2):
+        return self.__iop(p2, operator.mul)
+
+    def __idiv__(self, p2):
+        return self.__iop(p2, operator.div)
+
+    def __iop(self, p2, op):
+        if isinstance(p2, (float, int)):
+            self[0] = op(self[0], p2)
+            self[1] = op(self[1], p2)
+        else:
+            self[0] = op(self[0], p2[0])
+            self[1] = op(self[1], p2[1])
+        return self
+
+    def __repr__(self):
+        return self.__str__()
+        
+    def __str__(self):
+        return 'A2Vertex(%.2f, %.2f)' % tuple(self)
+
+    def __eq__(self, other):
+        if not isinstance(other, (array.array, list, tuple)):
+            return False
+        return tuple(self) == tuple(other)
+    
+
+class A3Vertexes:
+    pass
+class A2Vertexes:
+    pass
+class A3Vertexes(list):
+    def __init__(self, arr=None):
+        if arr is not None:
+            self.add_points(arr)
+            
+    def add_point(self, p: (A3Vertex, A2Vertex, array.array, list, tuple)):
+        self.append(A3Vertex(p))
+    def add_points(self, pp: (A3Vertexes, A2Vertexes, A3Vertex, A2Vertex, array.array, list, tuple)):
+        if isinstance(pp, (A3Vertexes, A2Vertexes)):
+            for p in pp:
+                self.append(A3Vertex(p))
+        elif isinstance(pp, (A3Vertex, A2Vertex)):
+            self.append(A3Vertex(pp))
+        else:
+            i = 0
+            simple = True
+            buf = []
+            for v in pp:
+                if isinstance(v, (A3Vertexes, A2Vertexes)):
+                    simple = False
+                    self.add_points(v)
+                elif isinstance(v, (A3Vertex, A2Vertex)):
+                    simple = False
+                    self.add_point(v)
+                elif isinstance(v, (array.array, list, tuple)):
+                    simple = False
+                    self.add_points(v)
+                elif not isinstance(v, (float, int)):
+                    simple = False
+                    Exception("[A3Vertexes] Can't parse '%s' to A3Vertex" % (v))
+                elif simple:
+                    if i % 3 == 0:
+                        buf.append(A3Vertex())
+                    buf[-1][i] = v 
+                    i = (i+1)%3
+            if simple:
+                self.extend(buf)
+
+    def flatten(self):
+        ret = []
+        for p in self:
+            ret.extend(tuple(p))
+        return ret
+        #return array.array('d', ret)
+    
+class A2Vertexes(list):
+    def __init__(self, arr=None):
+        if arr is not None:
+            self.add_points(arr)
+            
+    def add_point(self, p: (A3Vertex, A2Vertex, array.array, list, tuple)):
+        self.append(A2Vertex(p))
+    def add_points(self, pp: (A3Vertexes, A2Vertexes, A3Vertex, A2Vertex, array.array, list, tuple)):
+        if isinstance(pp, (A3Vertexes, A2Vertexes)):
+            for p in pp:
+                self.append(A3Vertex(p))
+        elif isinstance(pp, (A3Vertex, A2Vertex)):
+            self.append(A3Vertex(pp))
+        else:
+            i = 0
+            simple = True
+            buf = []
+            for v in pp:
+                if isinstance(v, (A3Vertexes, A2Vertexes)):
+                    simple = False
+                    self.add_points(v)
+                elif isinstance(v, (A3Vertex, A2Vertex)):
+                    simple = False
+                    self.add_point(v)
+                elif isinstance(v, (array.array, list, tuple)):
+                    simple = False
+                    self.add_points(v)
+                elif not isinstance(v, (float, int)):
+                    simple = False
+                    Exception("[A2Vertexes] Can't parse '%s' to A2Vertex" % (v))
+                elif simple:
+                    if i % 2 == 0:
+                        buf.append(A2Vertex())
+                    buf[-1][i] = v 
+                    i = (i+1)%2
+            if simple:
+                self.extend(buf)
+
+    def flatten(self):
+        ret = []
+        for p in self:
+            ret.extend(tuple(p))
+        return ret
+        #return array.array('d', ret)
 
 class ATrMatrix(np.matrix):
     def __new__(subtype, data=None, copy=True):
@@ -137,6 +339,11 @@ class ATrMatrix(np.matrix):
 
 
 
+def distance_2d(p1, p2):
+    """ Returns distance between two 2D points `p1` and `p2`
+    """
+    return math.sqrt((p1[0] - p2[0]) ** 2 +
+                     (p1[1] - p2[1]) ** 2)
 
 
 def list_to_ptr_arr(data, ptype=ctypes.c_ulong):
@@ -357,7 +564,10 @@ def vertexes_flatten(vtx: (A3Vertexes, A2Vertexes)):
     return vtx.flatten()
 '''
 
-
+if __name__ == "__main__":
+    a = A3Vertexes([1,2,3,4,5,6,7,8,9])
+    print(a)
+    print(a.flatten())
 
 
         
