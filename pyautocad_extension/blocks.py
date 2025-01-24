@@ -38,13 +38,13 @@ class AcadBlock(POINTER(_dll.IAcadBlock), _ez_ptr):
     ownerid = AcadObject.ownerid
 
     # VBA methods
-    def add3dface(self, Point1, Point2, Point3, Point4):
+    def add3dface(self, Point1: A3Vertex, Point2: A3Vertex, Point3: A3Vertex, Point4: A3Vertex):
         'Creates a 3DFace object given four vertices'
         return CastManager.cast(self.com_parent.Add3DFace(Point1, Point2, Point3, Point4))
     def add3dmesh(self, M, N, PointsMatrix):
         'Creates a free-form 3D mesh, given the number of points in the M and N directions and the coordinates of the points in the M and N directions'
         return CastManager.cast(self.com_parent.Add3DMesh(M, N, PointsMatrix))
-    def add3dpoly(self, PointsArray):
+    def add3dpoly(self, PointsArray: A3Vertexes):
         'Creates a 3D polyline from the given array of coordinates'
         return CastManager.cast(self.com_parent.Add3DPoly(PointsArray))
     def addarc(self, Center, Radius, StartAngle, EndAngle):

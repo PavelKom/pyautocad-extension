@@ -17,6 +17,7 @@ pattern1 = "_.*_"
 from comtypes.automation import IDispatch
 
 class _ez_ptr:
+    """Helper class for working with Python Object as COM Object"""
     @classmethod
     def ptr(cls):
         prnt = cls.__bases__[0]
@@ -64,8 +65,10 @@ class _ez_ptr:
       
 
 class CastManager:
+    """Cast AcadEntity to specific geometry object. Example: AcadEntity -> AcadArc"""
     @classmethod
     def cast(cls, obj):
+        """Cast COM to Python"""
         from obj_parser import dict_cast2
         from comtypes.client import GetBestInterface
         obj = GetBestInterface(obj)
@@ -76,6 +79,7 @@ class CastManager:
         return obj
     @classmethod
     def recast(cls, obj):
+        """Cast Python to COM"""
         from obj_parser import dict_cast
         if obj.__class__.__name__ in dict_cast.keys():
             obj.__class__ = dict_cast[obj.__class__.__name__]
@@ -85,6 +89,7 @@ class CastManager:
 
 
 class SetterProperty(object):
+    """Non-getter property decorator"""
     def __init__(self, func, doc=None):
         self.func = func
         self.__doc__ = doc if doc is not None else func.__doc__
@@ -93,6 +98,7 @@ class SetterProperty(object):
 
 
 class A3Vertex(APoint):
+    """Same as APoint, but with case insensitivies for xyz"""
     def __new__(cls, x_or_seq=0, y=0.0, z=0.0): # Allow trimmed lists for X
         if isinstance(x_or_seq, (array.array, list, tuple)):
             arr = []
@@ -117,7 +123,7 @@ class A3Vertex(APoint):
         return A3Vertex(abs(self.x), abs(self.y), abs(self.z))
     
 class A2Vertex(array.array):
-    # Same as A3Vertex but for 2D
+    """Same as AeVertex, but for 2D (ignore Z axis)"""
     def __new__(cls, x_or_seq=0, y=0.0): # Allow trimmed lists for X
         if isinstance(x_or_seq, (array.array, list, tuple)):
             arr = []
@@ -221,15 +227,15 @@ class A2Vertex(array.array):
         return tuple(self) == tuple(other)
     
 
-class A3Vertexes:
+class A3Vertexes: # stub
     pass
-class A2Vertexes:
+class A2Vertexes: # stub
     pass
 class A3Vertexes(list):
+    """List of A3Vertex'es, also user as raw array for AcadPolyline.Coordinates (and others)"""
     def __init__(self, arr=None):
         if arr is not None:
             self.add_points(arr)
-            
     def add_point(self, p: (A3Vertex, A2Vertex, array.array, list, tuple)):
         self.append(A3Vertex(p))
     def add_points(self, pp: (A3Vertexes, A2Vertexes, A3Vertex, A2Vertex, array.array, list, tuple)):
@@ -262,19 +268,20 @@ class A3Vertexes(list):
                     i = (i+1)%3
             if simple:
                 self.extend(buf)
-
+    @property
     def flatten(self):
+        """Get raw array of points [X1,Y1,Z1,...,Xn,Yn,Zn]"""
         ret = []
         for p in self:
-            ret.extend(tuple(p))
+            ret.extend(p)
         return ret
         #return array.array('d', ret)
     
 class A2Vertexes(list):
+    """List of A2Vertex'es, also user as raw array for AcadLWPolyline.Coordinates (and others)"""
     def __init__(self, arr=None):
         if arr is not None:
             self.add_points(arr)
-            
     def add_point(self, p: (A3Vertex, A2Vertex, array.array, list, tuple)):
         self.append(A2Vertex(p))
     def add_points(self, pp: (A3Vertexes, A2Vertexes, A3Vertex, A2Vertex, array.array, list, tuple)):
@@ -307,11 +314,12 @@ class A2Vertexes(list):
                     i = (i+1)%2
             if simple:
                 self.extend(buf)
-
+    @property
     def flatten(self):
+        """Get raw array of points [X1,Y1,...,Xn,Yn]"""
         ret = []
         for p in self:
-            ret.extend(tuple(p))
+            ret.extend(p)
         return ret
         #return array.array('d', ret)
 
@@ -413,7 +421,18 @@ def str_cut256(value: str):
     if len(value) > 256: return value[:256]
     return value
 
-
+def get_obj_block_source(source=None, new_doc_if_need: bool=True):
+    if source is None:
+        source = AcadApplication()
+    if isinstance(source, AcadApplication):
+        if source.Documents.Count == 0 and not new_doc_if_need:
+            raise ValueError("[get_obj_block_source] Can't create new AcadDocument")
+        source = source.activedocument if source.Documents.count > 0 else source.documents.add()
+    if isinstance(source, AcadDocument):
+        source = source.modelspace
+    if not isinstance(source, AcadBlock):
+        raise ValueError("[get_obj_block_source] 'source' argument must be AcadApplication, AcadDocument oe any type of AcadBlock (AcadBlock, AcadModelSpace, AcadPaperSpace)")
+    return source
 
 
 
@@ -527,19 +546,6 @@ def uncast(py_obj, prefer_type=None):
     #    py_obj.__class__ = py_parse_dict[key]
     returnpy_obj
 
-def get_obj_block_source(source=None, new_doc_if_need: bool=True):
-    if source is None:
-        source = AcadApplication()
-    if isinstance(source, AcadApplication):
-        if source.Documents.Count == 0 and not new_doc_if_need:
-            raise ValueError("[get_obj_block_source] Can't create new AcadDocument")
-        source = source.ActiveDocument if source.Documents.Count > 0 else source.Documents.Add()
-    if isinstance(source, AcadDocument):
-        source = source.ModelSpace
-    if not isinstance(source, AcadBlock):
-        raise ValueError("[get_obj_block_source] 'source' argument must be AcadApplication, AcadDocument oe any type of AcadBlock (AcadBlock, AcadModelSpace, AcadPaperSpace)")
-    return source
-
 def bounding_box(*args:A3Vertex):
     if len(args) < 1:
         raise ValueError("[bounding_box] Can't calculate bounding box without vertexes")
@@ -567,7 +573,7 @@ def vertexes_flatten(vtx: (A3Vertexes, A2Vertexes)):
 if __name__ == "__main__":
     a = A3Vertexes([1,2,3,4,5,6,7,8,9])
     print(a)
-    print(a.flatten())
+    print(a.flatten)
 
 
         

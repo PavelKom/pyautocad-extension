@@ -2,156 +2,156 @@ Used for visualisation inherits Autocad classes
 ─ │ ┌ ┐ └ ┘ ├ ┤ ┬ ┴ ┼ ═ ║ ╒ ╓ ╔ ╕ ╖ ╗ ╘ ╙ ╚ ╛ ╜ ╝ ╞ ╟ ╠ ╡ ╢ ╣ ╤ ╥ ╦ ╧ ╨ ╩ ╪ ╫ ╬
 class, ptr, hndl, no_hndl, iter, can_create, can_not_create, event, no_event, __str__
 Object
-	├─ AcadState | 
-	├─ AcadAcCmColor | 
-	├─ AcadApplication | class, can_create, no_hndl
-	├─ AcadObject | 
-	│	├─ AcadEntity | 
-	│	│	├─ Acad3DFace | 
-	│	│	├─ Acad3DPolyline | 
-	│	│	├─ Acad3DSolid | 
-	│	│	├─ AcadArc | 
-	│	│	├─ AcadAttribute | 
-	│	│	├─ AcadAttributeReference | 
-	│	│	├─ AcadBlockReference | 
-	│	│	│	├─ AcadExternalReference | 
-	│	│	│	│	├─ AcadComparedReference | NOT SUPPORTED
-	│	│	│	├─ AcadMInsertBlock | 
-	│	│	├─ AcadCircle | 
-	│	│	├─ AcadDimension | 
-	│	│	│	├─ AcadDim3PointAngular | 
-	│	│	│	├─ AcadDimAligned | 
-	│	│	│	├─ AcadDimAngular | 
-	│	│	│	├─ AcadDimArcLength | 
-	│	│	│	├─ AcadDimDiametric | 
-	│	│	│	├─ AcadDimOrdinate | 
-	│	│	│	├─ AcadDimRadial | 
-	│	│	│	├─ AcadDimRadialLarge | 
-	│	│	│	├─ AcadDimRotated | 
-	│	│	├─ AcadEllipse | 
-	│	│	├─ AcadGeoPositionMarker | 
-	│	│	├─ AcadHatch | 
-	│	│	├─ AcadHelix | 
-	│	│	├─ AcadLeader | 
-	│	│	├─ AcadLWPolyline | 
-	│	│	├─ AcadLine | 
-	│	│	├─ AcadLoftedSurface | 
-	│	│	├─ AcadMLeader | 
-	│	│	├─ AcadMLine | 
-	│	│	├─ AcadMtext | 
-	│	│	├─ AcadOle | 
-	│	│	├─ AcadPoint | 
-	│	│	├─ AcadPointCloud | 
-	│	│	├─ AcadPointCloudEx | 
-	│	│	├─ AcadPolyfaceMesh | 
-	│	│	├─ AcadPolygonMesh | 
-	│	│	├─ AcadPolyline | 
-	│	│	├─ AcadPViewport | 
-	│	│	├─ AcadRasterImage | 
-	│	│	│	├─ AcadWipeout | 
-	│	│	├─ AcadRay | 
-	│	│	├─ AcadRegion | 
-	│	│	├─ AcadSection | 
-	│	│	├─ AcadShape | 
-	│	│	├─ AcadSolid | 
-	│	│	├─ AcadSpline | 
-	│	│	├─ AcadSubDMesh | 
-	│	│	├─ AcadSurface | 
-	│	│	│	├─ AcadExtrudedSurface | 
-	│	│	│	├─ AcadNurbSurface | 
-	│	│	│	├─ AcadPlaneSurface | 
-	│	│	│	├─ AcadRevolvedSurface | 
-	│	│	│	├─ AcadSweptSurface | 
-	│	│	├─ AcadTable | 
-	│	│	├─ AcadText | 
-	│	│	├─ AcadTolerance | 
-	│	│	├─ AcadTrace | 
-	│	│	├─ AcadUnderlay | 
-	│	│	│	├─ AcadDgnUnderlay | 
-	│	│	│	├─ AcadDwfUnderlay | 
-	│	│	│	├─ AcadPdfUnderlay | 
-	│	│	├─ AcadXline | 
-	│	├─ AcadBlock | 
-	│	│	├─ AcadModelSpace | 
-	│	│	├─ AcadPaperSpace | 
-	│	├─ AcadBlocks | 
-	│	├─ AcadDictionaries | 
-	│	├─ AcadDictionary | 
-	│	├─ AcadDimStyle | 
-	│	├─ AcadDimStyles | 
-	│	├─ AcadGroup | 
-	│	├─ AcadGroups | 
-	│	├─ AcadLayer | 
-	│	├─ AcadLayers | 
-	│	├─ AcadLayouts | 
-	│	├─ AcadLinetype | 
-	│	├─ AcadLineTypes | 
-	│	├─ AcadMaterial | 
-	│	├─ AcadMaterials | 
-	│	├─ AcadMLeaderStyle | 
-	│	├─ AcadPlotConfiguration | 
-	│	│	├─ AcadLayout | 
-	│	├─ AcadPlotConfigurations | 
-	│	├─ AcadRegisteredApplication | 
-	│	├─ AcadRegisteredApplications | 
-	│	├─ AcadSectionManager | 
-	│	├─ AcadSectionSettings | 
-	│	├─ AcadSortentsTable | 
-	│	├─ AcadTableStyle | 
-	│	├─ AcadTextStyle | 
-	│	├─ AcadTextStyles | 
-	│	├─ AcadUCS | 
-	│	├─ AcadUCSs | 
-	│	├─ AcadView | 
-	│	├─ AcadViewport | 
-	│	├─ AcadViewports | 
-	│	├─ AcadViews | 
-	│	├─ AcadXRecord | 
-	├─ AcadDatabase | 
-	│	├─ AcadDocument | 
-	├─ AcadDocuments | 
-	├─ AcadDatabasePreferences | 
-	├─ AcadDynamicBlockReferenceProperty | 
-	├─ AcadHyperlink | 
-	├─ AcadHyperlinks | 
-	├─ AcadLayerStateManager | 
-	├─ AcadMenuBar | 
-	├─ AcadMenuGroup | 
-	├─ AcadMenuGroups | 
-	├─ AcadSubEntity | 
-	│	├─ AcadMLeaderLeader |
-	│	├─ AcadSubDMeshEdge | 
-	│	├─ AcadSubDMeshFace | 
-	│	├─ AcadSubDMeshVertex | 
-	│	├─ AcadSubEntSolidEdge | 
-	│	├─ AcadSubEntSolidFace | 
-	│	├─ AcadSubEntSolidNode | 
-	│	├─ AcadSubEntSolidVertex | 
-	├─ AcadIDPair | 
-	├─ AcadObjectEvents | 
-	├─ AcadPlot | 
-	├─ AcadPopupMenu | 
-	├─ AcadPopupMenuItem | 
-	├─ AcadPopupMenus | 
-	├─ AcadPreferences | 
-	├─ AcadPreferencesDisplay | 
-	├─ AcadPreferencesDrafting | 
-	├─ AcadPreferencesFiles | 
-	├─ AcadPreferencesOpenSave | 
-	├─ AcadPreferencesOutput | 
-	├─ AcadPreferencesProfiles | 
-	├─ AcadPreferencesSelection | 
-	├─ AcadPreferencesSystem | 
-	├─ AcadPreferencesUser | 
-	├─ AcadSectionTypeSettings | 
-	├─ AcadSecurityParams | 
-	├─ AcadSelectionSet | 
-	├─ AcadSelectionSets | 
-	├─ AcadSummaryInfo | 
-	├─ AcadToolbar | 
-	├─ AcadToolbarItem | 
-	├─ AcadToolbars | 
-	├─ AcadUtility | 
+├─ AcadState | 
+├─ AcadAcCmColor | 
+├─ AcadApplication | class, can_create, no_hndl
+├─ AcadObject | 
+│	├─ AcadEntity | 
+│	│	├─ Acad3DFace | 
+│	│	├─ Acad3DPolyline | 
+│	│	├─ Acad3DSolid | 
+│	│	├─ AcadArc | 
+│	│	├─ AcadAttribute | 
+│	│	├─ AcadAttributeReference | 
+│	│	├─ AcadBlockReference | 
+│	│	│	├─ AcadExternalReference | 
+│	│	│	│	├─ AcadComparedReference | NOT SUPPORTED
+│	│	│	├─ AcadMInsertBlock | 
+│	│	├─ AcadCircle | 
+│	│	├─ AcadDimension | 
+│	│	│	├─ AcadDim3PointAngular | 
+│	│	│	├─ AcadDimAligned | 
+│	│	│	├─ AcadDimAngular | 
+│	│	│	├─ AcadDimArcLength | 
+│	│	│	├─ AcadDimDiametric | 
+│	│	│	├─ AcadDimOrdinate | 
+│	│	│	├─ AcadDimRadial | 
+│	│	│	├─ AcadDimRadialLarge | 
+│	│	│	├─ AcadDimRotated | 
+│	│	├─ AcadEllipse | 
+│	│	├─ AcadGeoPositionMarker | 
+│	│	├─ AcadHatch | 
+│	│	├─ AcadHelix | 
+│	│	├─ AcadLeader | 
+│	│	├─ AcadLWPolyline | 
+│	│	├─ AcadLine | 
+│	│	├─ AcadLoftedSurface | 
+│	│	├─ AcadMLeader | 
+│	│	├─ AcadMLine | 
+│	│	├─ AcadMtext | 
+│	│	├─ AcadOle | 
+│	│	├─ AcadPoint | 
+│	│	├─ AcadPointCloud | 
+│	│	├─ AcadPointCloudEx | 
+│	│	├─ AcadPolyfaceMesh | 
+│	│	├─ AcadPolygonMesh | 
+│	│	├─ AcadPolyline | 
+│	│	├─ AcadPViewport | 
+│	│	├─ AcadRasterImage | 
+│	│	│	├─ AcadWipeout | 
+│	│	├─ AcadRay | 
+│	│	├─ AcadRegion | 
+│	│	├─ AcadSection | 
+│	│	├─ AcadShape | 
+│	│	├─ AcadSolid | 
+│	│	├─ AcadSpline | 
+│	│	├─ AcadSubDMesh | 
+│	│	├─ AcadSurface | 
+│	│	│	├─ AcadExtrudedSurface | 
+│	│	│	├─ AcadNurbSurface | 
+│	│	│	├─ AcadPlaneSurface | 
+│	│	│	├─ AcadRevolvedSurface | 
+│	│	│	├─ AcadSweptSurface | 
+│	│	├─ AcadTable | 
+│	│	├─ AcadText | 
+│	│	├─ AcadTolerance | 
+│	│	├─ AcadTrace | 
+│	│	├─ AcadUnderlay | 
+│	│	│	├─ AcadDgnUnderlay | 
+│	│	│	├─ AcadDwfUnderlay | 
+│	│	│	├─ AcadPdfUnderlay | 
+│	│	├─ AcadXline | 
+│	├─ AcadBlock | 
+│	│	├─ AcadModelSpace | 
+│	│	├─ AcadPaperSpace | 
+│	├─ AcadBlocks | 
+│	├─ AcadDictionaries | 
+│	├─ AcadDictionary | 
+│	├─ AcadDimStyle | 
+│	├─ AcadDimStyles | 
+│	├─ AcadGroup | 
+│	├─ AcadGroups | 
+│	├─ AcadLayer | 
+│	├─ AcadLayers | 
+│	├─ AcadLayouts | 
+│	├─ AcadLinetype | 
+│	├─ AcadLineTypes | 
+│	├─ AcadMaterial | 
+│	├─ AcadMaterials | 
+│	├─ AcadMLeaderStyle | 
+│	├─ AcadPlotConfiguration | 
+│	│	├─ AcadLayout | 
+│	├─ AcadPlotConfigurations | 
+│	├─ AcadRegisteredApplication | 
+│	├─ AcadRegisteredApplications | 
+│	├─ AcadSectionManager | 
+│	├─ AcadSectionSettings | 
+│	├─ AcadSortentsTable | 
+│	├─ AcadTableStyle | 
+│	├─ AcadTextStyle | 
+│	├─ AcadTextStyles | 
+│	├─ AcadUCS | 
+│	├─ AcadUCSs | 
+│	├─ AcadView | 
+│	├─ AcadViewport | 
+│	├─ AcadViewports | 
+│	├─ AcadViews | 
+│	├─ AcadXRecord | 
+├─ AcadDatabase | 
+│	├─ AcadDocument | 
+├─ AcadDocuments | 
+├─ AcadDatabasePreferences | 
+├─ AcadDynamicBlockReferenceProperty | 
+├─ AcadHyperlink | 
+├─ AcadHyperlinks | 
+├─ AcadLayerStateManager | 
+├─ AcadMenuBar | 
+├─ AcadMenuGroup | 
+├─ AcadMenuGroups | 
+├─ AcadSubEntity | 
+│	├─ AcadMLeaderLeader |
+│	├─ AcadSubDMeshEdge | 
+│	├─ AcadSubDMeshFace | 
+│	├─ AcadSubDMeshVertex | 
+│	├─ AcadSubEntSolidEdge | 
+│	├─ AcadSubEntSolidFace | 
+│	├─ AcadSubEntSolidNode | 
+│	├─ AcadSubEntSolidVertex | 
+├─ AcadIDPair | 
+├─ AcadObjectEvents | 
+├─ AcadPlot | 
+├─ AcadPopupMenu | 
+├─ AcadPopupMenuItem | 
+├─ AcadPopupMenus | 
+├─ AcadPreferences | 
+├─ AcadPreferencesDisplay | 
+├─ AcadPreferencesDrafting | 
+├─ AcadPreferencesFiles | 
+├─ AcadPreferencesOpenSave | 
+├─ AcadPreferencesOutput | 
+├─ AcadPreferencesProfiles | 
+├─ AcadPreferencesSelection | 
+├─ AcadPreferencesSystem | 
+├─ AcadPreferencesUser | 
+├─ AcadSectionTypeSettings | 
+├─ AcadSecurityParams | 
+├─ AcadSelectionSet | 
+├─ AcadSelectionSets | 
+├─ AcadSummaryInfo | 
+├─ AcadToolbar | 
+├─ AcadToolbarItem | 
+├─ AcadToolbars | 
+├─ AcadUtility | 
 
 
 event interfaces:
@@ -159,7 +159,10 @@ _DAcadApplicationEvents - app event interface
 _DAcadDocumentEvents - doc event interface
 
 other classes:
+_ez_ptr - parent class for all Acad* classes, used for interact with Python object as COM object
 _EventCaller - parent class for all Acad* classes that have events
+CastManager - cast AcadEntity to it's inheritor and back
+SetterProperty - property decorator without getter (only setter)
 A3Vertex - APoint - 3DPoint
 A2Vertex - 2D point
 A3Vertexes - list<A3Vertex>

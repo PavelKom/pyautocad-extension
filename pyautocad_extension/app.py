@@ -11,7 +11,7 @@ from stubs import *
 from event_sink import _AcadEventDumper
 from api import acad_dll #TODO: api -> .api
 from doc import AcadDocument, AcadDocuments #TODO: doc -> .doc
-from utils import _ez_ptr, CastManager
+from utils import _ez_ptr, CastManager, A3Vertex
 _dll = acad_dll.dll
 
 class AcadApplication(POINTER(_dll.IAcadApplication), _ez_ptr):
@@ -72,7 +72,7 @@ class AcadApplication(POINTER(_dll.IAcadApplication), _ez_ptr):
     def ZoomAll(self):
         """Zooms the current viewport to display the entire drawing"""
         self.com_parent.ZoomAll()
-    def ZoomCenter(self, Center: A3Point, Magnify: float):
+    def ZoomCenter(self, Center: A3Vertex, Magnify: float):
         """Zooms the current viewport to a specified center point and magnification"""
         self.com_parent.ZoomCenter(Center, Magnify)
     def ZoomExtents(self):
@@ -87,7 +87,7 @@ class AcadApplication(POINTER(_dll.IAcadApplication), _ez_ptr):
     def ZoomScaled(self, scale: float, ScaleType: AcZoomScaleType):
         """Zooms the current viewport to given scale factor"""
         self.com_parent.ZoomScaled(scale, ScaleType.value)
-    def ZoomWindow(self, LowerLeft, UpperRight):#LowerLeft, UpperRight as A3Point
+    def ZoomWindow(self, LowerLeft: A3Vertex, UpperRight: A3Vertex):#LowerLeft, UpperRight as A3Vertex
         """Zooms the current viewport to the area specified by two opposite corners of a rectangle"""
         self.com_parent.ZoomWindow(LowerLeft, UpperRight)
 
@@ -273,6 +273,8 @@ __all__ = ("AcadApplication", "AcadApplicationEvents", )
 
 # for debugging
 if __name__ == "__main__":
+	app = AcadApplication()
+	'''
     import pyperclip
     class Method(dict):
         def __str__(self):
@@ -365,6 +367,6 @@ if __name__ == "__main__":
         #print(objs[k])
         data += str(objs[k]) + "\n"
     write(data)
-
+	'''
     
     

@@ -4,6 +4,12 @@ from api import acad_dll
 from enums import AcExtendOption, AcColor, AcLineWeight
 _dll = acad_dll.dll
 
+class AcadState(POINTER(_dll.IAcadState), _ez_ptr):
+	pass
+
+
+
+
 
 class AcadObject(POINTER(_dll.IAcadObject), _ez_ptr):
     def delete(self):

@@ -13,10 +13,12 @@ except:
 	AcadView, AcadSectionSettings) # TODO: recheck this
 try:
 	from .utils import (_ez_ptr, CastManager, SetterProperty,
-	A3Vertex, A3Vertexes, A2Vertex, A2Vertexes)
+	A3Vertex, A3Vertexes, A2Vertex, A2Vertexes,
+	get_obj_block_source)
 except:
 	from utils import (_ez_ptr, CastManager, SetterProperty,
-	A3Vertex, A3Vertexes, A2Vertex, A2Vertexes)
+	A3Vertex, A3Vertexes, A2Vertex, A2Vertexes,
+	get_obj_block_source)
 try:
 	from .api import acad_dll
 except:
@@ -143,10 +145,12 @@ class Acad3DFace(POINTER(_dll.IAcad3DFace), _ez_ptr):# ENTITY
 		# 1. COM-types to python-types vars and props +
 		# 2. ByRef inputs/outputs
 		# 3. Inherits +
-		# 4. __new__
+		# 4. __new__ +
 		# 5. Aliases
 		# 6. Overloads
 		# 9999. Tests
+	def __new__(cls, Point1: A3Vertex, Point2: A3Vertex, Point3: A3Vertex, Point4: A3Vertex, source=None):
+		return get_obj_block_source(source).add3dface(Point1, Point2, Point3, Point4)
 	# Methods
 	def getinvisibleedge(self, Index: int) -> bool:
 		"Gets the visibility status for the edge."
@@ -303,10 +307,12 @@ class Acad3DPolyline(POINTER(_dll.IAcad3DPolyline), _ez_ptr):# ENTITY
 		# 1. COM-types to python-types vars and props +
 		# 2. ByRef inputs/outputs
 		# 3. Inherits +
-		# 4. __new__
+		# 4. __new__ +
 		# 5. Aliases
 		# 6. Overloads
 		# 9999. Tests
+	def __new__(cls, PointsArray: A3Vertexes, source=None):
+		return get_obj_block_source(source).add3dpoly(PointsArray)
 	# Methods
 	def appendvertex(self, vertex: A3Vertex):
 		"Appends a vertex to the 3dPolyline."
@@ -8929,13 +8935,13 @@ class AcadSurface(POINTER(_dll.IAcadSurface), _ez_ptr):# ENTITY
 	#	_IAcadSurface__com__set_EdgeExtensionDistances
 	# Properties
 	@property
-	def edgeextensiondistances(self) -> tagVARIANT:
+	def edgeextensiondistances(self): # -> tagVARIANT:
 		"Indicates the extension distances of the edges"
 		# TODO: Check arguments
 		# ['out', 'retval'] extDistances:tagVARIANT ???????????????????
 		return self.com_parent.EdgeExtensionDistances
 	@edgeextensiondistances.setter
-	def _(self, extDistances:tagVARIANT):
+	def _(self, extDistances):
 		# TODO: Check arguments
 		# ['in'] extDistances:tagVARIANT
 		self.com_parent.EdgeExtensionDistances = extDistances
@@ -8976,9 +8982,9 @@ class AcadSurface(POINTER(_dll.IAcadSurface), _ez_ptr):# ENTITY
 		# ['out', 'retval'] associative:tagVARIANT | bool ??????????
 		return self.com_parent.SurfTrimAssociativity
 	@surftrimassociativity.setter
-	def _(self, associative:tagVARIANT):
+	def _(self, associative:bool):
 		# TODO: Check arguments
-		# ['in'] associative:tagVARIANT
+		# ['in'] associative:tagVARIANT | bool ??????????
 		self.com_parent.SurfTrimAssociativity = associative
 
 	@property
@@ -10418,10 +10424,10 @@ class AcadLWPolyline(POINTER(_dll.IAcadLWPolyline), _ez_ptr):# ENTITY
 		# ['out', 'retval'] Coordinates:tagVARIANT
 		return A2Vertexes(self.com_parent.Coordinates)
 	@coordinates.setter
-	def _(self, Coordinates:tagVARIANT):
+	def _(self, Coordinates:A2Vertexes):
 		# TODO: Check arguments
 		# ['in'] Coordinates:tagVARIANT
-		self.com_parent.Coordinates = Coordinates
+		self.com_parent.Coordinates = Coordinates.flatten
 
 	@property
 	def elevation(self) -> float:
@@ -10453,15 +10459,15 @@ class AcadLWPolyline(POINTER(_dll.IAcadLWPolyline), _ez_ptr):# ENTITY
 		self.com_parent.LinetypeGeneration = bLinetypeGen
 
 	@property
-	def normal(self) -> tagVARIANT:
+	def normal(self) -> A3Vertex:
 		"Specifies the three-dimensional normal unit vector for the entity"
 		# TODO: Check arguments
-		# ['out', 'retval'] Normal:tagVARIANT
-		return self.com_parent.Normal
+		# ['out', 'retval'] Normal:tagVARIANT | A3Vertex
+		return A3Vertex(self.com_parent.Normal)
 	@normal.setter
-	def _(self, Normal:tagVARIANT):
+	def _(self, Normal:A3Vertex):
 		# TODO: Check arguments
-		# ['in'] Normal:tagVARIANT
+		# ['in'] Normal:tagVARIANT | A3Vertex
 		self.com_parent.Normal = Normal
 
 	@property
@@ -10610,7 +10616,7 @@ class AcadLeader(POINTER(_dll.IAcadLeader), _ez_ptr):# ENTITY
 	def _(self, Coordinates:A3Vertexes):
 		# TODO: Check arguments
 		# ['in'] Coordinates:tagVARIANT | A3Vertexes
-		self.com_parent.Coordinates = Coordinates
+		self.com_parent.Coordinates = Coordinates.flatten
 
 	@property
 	def dimensionlinecolor(self) -> int:
@@ -11790,7 +11796,7 @@ class AcadMLine(POINTER(_dll.IAcadMLine), _ez_ptr):# ENTITY
 	def _(self, Vertices:A3Vertexes):
 		# TODO: Check arguments
 		# ['in'] Vertices:tagVARIANT | A3Vertexes
-		self.com_parent.Coordinates = Vertices
+		self.com_parent.Coordinates = Vertices.flatten
 
 	@property
 	def justification(self) -> int:
@@ -12438,7 +12444,7 @@ class AcadPViewport(POINTER(_dll.IAcadPViewport), _ez_ptr):# ENTITY
 		# ['out', 'retval'] dirVector:tagVARIANT | A3Vertex
 		return A3Vertex(self.com_parent.Direction)
 	@direction.setter
-	def _(self, dirVector:A3Vertex): | A3Vertex
+	def _(self, dirVector:A3Vertex):
 		# TODO: Check arguments
 		# ['in'] dirVector:tagVARIANT
 		self.com_parent.Direction = dirVector
@@ -13403,7 +13409,7 @@ class AcadPolyfaceMesh(POINTER(_dll.IAcadPolyfaceMesh), _ez_ptr):# ENTITY
 	def _(self, Vertices:A3Vertexes):
 		# TODO: Check arguments
 		# ['in'] Vertices:tagVARIANT | A3Vertexes
-		self.com_parent.Coordinates = Vertices
+		self.com_parent.Coordinates = Vertices.flatten
 
 	# ??????????????????????
 	@property
@@ -13532,7 +13538,7 @@ class AcadPolygonMesh(POINTER(_dll.IAcadPolygonMesh), _ez_ptr):# ENTITY
 	def _(self, Coordinates:A3Vertexes):
 		# TODO: Check arguments
 		# ['in'] Coordinates:tagVARIANT | A3Vertexes
-		self.com_parent.Coordinates = Coordinates
+		self.com_parent.Coordinates = Coordinates.flatten
 
 	@property
 	def mclose(self) -> bool:
@@ -13778,7 +13784,7 @@ class AcadPolyline(POINTER(_dll.IAcadPolyline), _ez_ptr):# ENTITY
 	def _(self, Coordinates:A3Vertexes):
 		# TODO: Check arguments
 		# ['in'] Coordinates:tagVARIANT
-		self.com_parent.Coordinates = Coordinates
+		self.com_parent.Coordinates = Coordinates.flatten
 
 	@property
 	def elevation(self) -> float:
@@ -14803,7 +14809,7 @@ class AcadSolid(POINTER(_dll.IAcadSolid), _ez_ptr):# ENTITY
 	def _(self, corners:A3Vertexes):
 		# TODO: Check arguments
 		# ['in'] corners:tagVARIANT | A3Vertexes
-		self.com_parent.Coordinates = corners
+		self.com_parent.Coordinates = corners.flatten
 
 	@property
 	def normal(self) -> A3Vertex:
@@ -15013,7 +15019,7 @@ class AcadSpline(POINTER(_dll.IAcadSpline), _ez_ptr):# ENTITY
 	def _(self, controlPoint:A3Vertexes):
 		# TODO: Check arguments
 		# ['in'] controlPoint:tagVARIANT | A3Vertexes
-		self.com_parent.ControlPoints = controlPoint
+		self.com_parent.ControlPoints = controlPoint.flatten
 
 	@property
 	def degree(self) -> int:
@@ -15055,7 +15061,7 @@ class AcadSpline(POINTER(_dll.IAcadSpline), _ez_ptr):# ENTITY
 	def _(self, fitPoint:A3Vertexes):
 		# TODO: Check arguments
 		# ['in'] fitPoint:tagVARIANT | A3Vertexes
-		self.com_parent.FitPoints = fitPoint
+		self.com_parent.FitPoints = fitPoint.flatten
 
 	@property
 	def fittolerance(self) -> float:
@@ -15257,7 +15263,7 @@ class AcadSubDMesh(POINTER(_dll.IAcadSubDMesh), _ez_ptr):# ENTITY
 	def _(self, corners:A3Vertexes):
 		# TODO: Check arguments
 		# ['in'] corners:tagVARIANT | A3Vertexes
-		self.com_parent.Coordinates = corners
+		self.com_parent.Coordinates = corners.flatten
 
 	@property
 	def facecount(self) -> int:
@@ -15702,7 +15708,7 @@ class AcadTable(POINTER(_dll.IAcadTable), _ez_ptr):# ENTITY
 		# VBA: object.GetCellDataType row, col, pDataType, pUnitType
 		return self.com_parent.GetCellDataType(row, col)
 
-	def getcellextents(self, row: int, col: int, bOuterCell: bool) -> tagVARIANT:
+	def getcellextents(self, row: int, col: int, bOuterCell: bool): # -> tagVARIANT:
 		"Gets the cell extents for the specified row and column."
 		# TODO: Check arguments
 		# ['in'] row:int
@@ -15769,7 +15775,7 @@ class AcadTable(POINTER(_dll.IAcadTable), _ez_ptr):# ENTITY
 		# VBA: pCellStyle = object.GetCellStyle (nRow, nCol)
 		return self.com_parent.GetCellStyle(nRow, nCol)
 
-	def getcellstyleoverrides(self, row: int, col: int) -> tagVARIANT:
+	def getcellstyleoverrides(self, row: int, col: int): # -> tagVARIANT:
 		"Returns the cellStyleOverrides."
 		# TODO: Check arguments
 		# ['in'] row:int
@@ -15805,7 +15811,7 @@ class AcadTable(POINTER(_dll.IAcadTable), _ez_ptr):# ENTITY
 		# VBA: pCellType = object.GetCellType (row, col)
 		return self.com_parent.GetCellType(row, col)
 
-	def getcellvalue(self, row: int, col: int) -> tagVARIANT:
+	def getcellvalue(self, row: int, col: int): # -> tagVARIANT:
 		"Gets the cell value for the specified row and column."
 		# TODO: Check arguments
 		# ['in'] row:int
@@ -15866,7 +15872,7 @@ class AcadTable(POINTER(_dll.IAcadTable), _ez_ptr):# ENTITY
 		# VBA: pType = object.GetContentType (nRow, nCol)
 		return self.com_parent.GetContentType(nRow, nCol)
 
-	def getcustomdata(self, nRow: int, nCol: int, szKey: str) -> tagVARIANT:
+	def getcustomdata(self, nRow: int, nCol: int, szKey: str): # -> tagVARIANT:
 		"Gets the custom data value set in cell, row, or column."
 		# TODO: Check arguments
 		# ['in'] nRow:int
@@ -16186,7 +16192,7 @@ class AcadTable(POINTER(_dll.IAcadTable), _ez_ptr):# ENTITY
 		# VBA: pbstrStyleName = object.GetTextStyle2 (nRow, nCol, nContent)
 		return self.com_parent.GetTextStyle2(nRow, nCol, nContent)
 
-	def getvalue(self, nRow: int, nCol: int, nContent: int) -> tagVARIANT:
+	def getvalue(self, nRow: int, nCol: int, nContent: int): # -> tagVARIANT:
 		"Gets the cell value for the specified row and column and nContent."
 		# TODO: Check arguments
 		# ['in'] nRow:int
@@ -16909,13 +16915,13 @@ class AcadTable(POINTER(_dll.IAcadTable), _ez_ptr):# ENTITY
 		# VBA: object.SetToolTip nRow, nCol, tip
 		self.com_parent.SetToolTip(nRow, nCol, tip)
 
-	def setvalue(self, nRow: int, nCol: int, nContent: int, acValue: tagVARIANT):
+	def setvalue(self, nRow: int, nCol: int, nContent: int, acValue):
 		"Sets the cell value by parsing the text for the specified row and column and nContent."
 		# TODO: Check arguments
 		# ['in'] nRow:int
 		# ['in'] nCol:int
 		# ['in'] nContent:int
-		# ['in'] acValue:tagVARIANT
+		# ['in'] acValue:tagVARIANT ??????????????????????????
 		# VBA: object.SetValue nRow, nCol, nContent, acValue
 		self.com_parent.SetValue(nRow, nCol, nContent, acValue)
 
@@ -17188,7 +17194,7 @@ class AcadTable(POINTER(_dll.IAcadTable), _ez_ptr):# ENTITY
 		self.com_parent.TableBreakHeight = pHeight
 
 	@property
-	def tablestyleoverrides(self) -> tagVARIANT:
+	def tablestyleoverrides(self): # -> tagVARIANT:
 		"Returns the tableStyleOverrides."
 		# TODO: Check arguments
 		# ['out', 'retval'] pIntArray:tagVARIANT
@@ -17734,7 +17740,7 @@ class AcadTrace(POINTER(_dll.IAcadTrace), _ez_ptr):# ENTITY
 	def _(self, corners:A3Vertexes):
 		# TODO: Check arguments
 		# ['in'] corners:tagVARIANT | A3Vertexes
-		self.com_parent.Coordinates = corners
+		self.com_parent.Coordinates = corners.flatten
 
 	@property
 	def normal(self) -> A3Vertex:
@@ -17819,15 +17825,8 @@ class AcadXline(POINTER(_dll.IAcadXline), _ez_ptr):# ENTITY
 	objectid = AcadEntity.objectid
 	objectname = AcadEntity.objectname
 	ownerid = AcadEntity.ownerid
-	#	_IAcadXline__com__get_BasePoint
-	#	_IAcadXline__com__get_DirectionVector
-	#	_IAcadXline__com__get_SecondPoint
-	
-	#	_IAcadXline__com__set_BasePoint
-	#	_IAcadXline__com__set_DirectionVector
-	#	_IAcadXline__com__set_SecondPoint
 	# Methods
-	def offset(self, Distance: float) -> tagVARIANT:
+	def offset(self, Distance: float) -> list:
 		"Creates a new entity object by offsetting the Xline by a specified distance"
 		# TODO: Check arguments
 		# ['in'] Distance:float
